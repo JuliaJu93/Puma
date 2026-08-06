@@ -1,0 +1,13 @@
+node_modules/
+dist/
+storybook-static/
+.env
+.env.*
+!.env.example
+.cache/
+coverage/
+cypress/screenshots/
+cypress/videos/
+.idea/
+.DS_Store
+*.log
