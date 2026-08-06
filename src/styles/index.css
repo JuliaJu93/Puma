@@ -1,5 +1,200 @@
 @import "tailwindcss";
 
-/* Design tokens land here in step 3 — raw colors, then meaning-based names. */
+/* Two-tier wiring check (Task 5): semantics are declared inside @theme as
+   `var(--color-brand-500)` etc., directly referencing primitives also
+   declared inside @theme — no :root fallback needed. Verified by building
+   (`pnpm build`) with src/styles/TokenDocs.stories.tsx exercising every
+   token as a literal Tailwind className and grepping dist/faster.css: the
+   var() chains survive unresolved (e.g. `--color-accent:var(--color-brand-500)`)
+   and every corresponding utility (`.bg-accent{background-color:var(--color-accent)}`)
+   compiles correctly. The one real gotcha hit along the way: Tailwind's
+   static scanner only sees whole, literal className strings — a first pass
+   at the doc story built class names with template literals
+   (`` `bg-${token}` ``) and Tailwind silently generated nothing for them,
+   which is why every swatch in that story spells its class out in full. */
+
+/* ==========================================================================
+   PRIMITIVES
+   What a color IS, not what it's for. Numbered on a conventional 50–900
+   scale. Every value traces to docs/design-spec.md §1. Never reference
+   these from component code directly — see SEMANTICS below.
+   ========================================================================== */
 @theme {
+  /* Neutral ramp — design-spec.md §1 "Neutrals / greys" (10-step, white to black) */
+  --color-neutral-50: #ffffff;
+  --color-neutral-100: #fafafa;
+  --color-neutral-200: #f5f5f5;
+  --color-neutral-300: #eeeeee;
+  --color-neutral-400: #e1e1e1;
+  --color-neutral-500: #cacaca;
+  --color-neutral-600: #8e8e8e;
+  --color-neutral-700: #4b4b4b;
+  --color-neutral-800: #1f1f1f;
+  --color-neutral-900: #000000;
+
+  /* Brand (teal) ramp — design-spec.md §1 "Brand teal ramp".
+     #15c5ce is the ramp's "500" per the spec's own convention; #7ddde1 is a
+     distinct, deliberately separate disabled tint used only by Link (see
+     SEMANTICS, --color-link-fg-disabled). */
+  --color-brand-100: #b0ebec;
+  --color-brand-200: #7ddde1;
+  --color-brand-300: #47cfd6;
+  --color-brand-500: #15c5ce;
+  --color-brand-700: #00abb6;
+
+  /* Danger (red) ramp — design-spec.md §1 "Danger/red ramp".
+     #f64c4c is the ramp's "500" per the spec's own convention. */
+  --color-danger-50: #fef2f2;
+  --color-danger-100: #ffccd2;
+  --color-danger-200: #f49898;
+  --color-danger-300: #eb6f70;
+  --color-danger-500: #f64c4c;
+  --color-danger-600: #ec2d30;
+
+  /* Functional — single-use, not a ramp. design-spec.md §1 "Single-use / functional" */
+  --color-warning-500: #ffad0d;
+}
+
+/* ==========================================================================
+   SEMANTICS
+   What a color is FOR. Components may reference ONLY these tokens, never
+   the primitives above — that's the rule that keeps the system reusable
+   when a second consumer uses teal or red differently.
+   ========================================================================== */
+@theme {
+  /* Surface */
+  --color-surface: var(--color-neutral-50); /* base bg: button fills, input field, dialog modal */
+  --color-surface-disabled: var(--color-neutral-100); /* Input disabled bg — design-spec §5 */
+
+  /* Foreground */
+  --color-fg: var(--color-neutral-700); /* body text: filled input, Outline/Ghost button, dialog body */
+  --color-fg-muted: var(--color-neutral-600); /* icon default tint, prefix/suffix text */
+  --color-fg-subtle: var(--color-neutral-500); /* placeholder text */
+  --color-fg-disabled: var(--color-neutral-500); /* Button/Link disabled text — see decision 2 below */
+  --color-fg-heading: var(--color-neutral-800); /* dialog title */
+  --color-fg-on-accent: var(--color-neutral-50); /* white text on Primary / Danger-Primary fills */
+
+  /* Border */
+  --color-border: var(--color-neutral-400); /* default input / outline-button border */
+  --color-border-disabled: var(--color-neutral-300); /* disabled outline-button / input border */
+  --color-border-focus: var(--color-brand-500); /* input focus border */
+  --color-border-error: var(--color-danger-500); /* input error border */
+
+  /* Accent (brand) — used as bg on Primary, and as fg+border on Outline/Link */
+  --color-accent: var(--color-brand-500);
+  --color-accent-hover: var(--color-brand-300);
+  --color-accent-pressed: var(--color-brand-700);
+  --color-accent-disabled: var(--color-brand-100); /* Primary / IconButton-Primary disabled bg */
+
+  /* Link is the one accent consumer with its own, distinct disabled tint
+     (#7ddde1, not #b0ebec — a real, verified value per design-spec §1).
+     Kept as a component-level token rather than folding it into
+     --color-accent-disabled, matching the fill-vs-foreground split already
+     made for danger below. */
+  --color-link-fg-disabled: var(--color-brand-200);
+
+  /* Danger — used as bg on Primary-danger, and as fg+border on Outline/Link-danger, Input error */
+  --color-danger: var(--color-danger-500);
+  --color-danger-hover: var(--color-danger-300);
+  --color-danger-pressed: var(--color-danger-600);
+
+  /* Decision 1 (design-spec §7.2): the danger ramp has two verified disabled
+     tints — a paler one for solid fills, a darker one for text/borders on
+     white. Keeping both rather than unifying: a fill needs enough
+     saturation to still read as "danger" at a glance, while foreground
+     text/border sitting directly on white needs to stay pale enough not to
+     look like an active error. Collapsing them either washes out the fill
+     or darkens the disabled text into looking active. */
+  --color-danger-disabled-fill: var(--color-danger-100); /* Primary-danger disabled bg, Ghost-danger pressed fill */
+  --color-danger-disabled-fg: var(--color-danger-200); /* Outline/Link-danger disabled border+text */
+
+  /* Decision 2 (design-spec §7.3): Input's disabled text (#e1e1e1) is kept
+     as its OWN component-level token rather than folded into the shared
+     --color-fg-disabled (#cacaca) used by Button/Link. Reason: Input's
+     disabled state sits on its own muted surface (--color-surface-disabled,
+     #fafafa) rather than white/transparent, so it needs a paler text value
+     to read correctly there — unifying would either make Input's disabled
+     text too dark against its own background or force Button's disabled
+     text lighter than its (white) background needs. */
+  --color-input-fg-disabled: var(--color-neutral-400);
+
+  /* Decision 3 (design-spec §7.1): Ghost/danger changes text color on
+     Pressed (--color-danger-pressed) but not on Hover, while every other
+     colored style (Outline, Link) tracks the full ramp at every state.
+     Replicated exactly rather than normalized — it's a real, verified
+     finding, not a transcription gap. No extra token is needed for this:
+     it falls out of step 4 simply not applying --color-danger-hover to
+     Ghost's text and only applying --color-danger-pressed on Pressed. */
+
+  /* Overlay — dialog scrim. #000000 (neutral-900) at 30% opacity, design-spec §3. */
+  --color-overlay: rgb(0 0 0 / 0.3);
+}
+
+/* ==========================================================================
+   NON-COLOR TOKENS
+   design-spec.md §2 (type), §3 (radius, border, shadow, sizing, spacing).
+   ========================================================================== */
+@theme {
+  /* Type scale — sizes shared by Button and Input across their 3 sizes;
+     --text-title is Dialog-only. Named --text-control-* rather than the
+     plain sm/md/lg Tailwind already uses by default: Tailwind ships its own
+     built-in --text-sm/md/lg (different px values), and silently
+     overriding those would change the size of any consumer who reaches for
+     ordinary Tailwind text utilities instead of these tokens. Weight is a
+     separate axis: filled buttons are always 500, everything else is
+     always 400 (design-spec §2) — that's Tailwind's own built-in
+     `font-normal` (400) / `font-medium` (500), no custom token needed. */
+  --text-control-sm: 0.75rem; /* 12px */
+  --text-control-sm--line-height: 1.125rem; /* 18px */
+  --text-control-md: 0.875rem; /* 14px */
+  --text-control-md--line-height: 1.375rem; /* 22px */
+  --text-control-lg: 1rem; /* 16px */
+  --text-control-lg--line-height: 1.5rem; /* 24px */
+  --text-title: 1.125rem; /* 18px, Dialog title only */
+  --text-title--line-height: 1.625rem; /* 26px */
+
+  /* Font stack (design-spec §7.6 open question): the file specifies PingFang
+     SC alone, a CJK-first family with no fallback. A component library also
+     needs solid Latin rendering, so PingFang SC stays first (it IS the
+     spec'd font and renders Latin glyphs fine) with each OS's native
+     system-UI font behind it, then a generic sans-serif as the final
+     fallback. No fallback value is invented beyond what's needed to avoid
+     an unstyled-text flash on platforms without PingFang SC installed. */
+  --font-sans:
+    "PingFang SC", -apple-system, "Segoe UI", Roboto, sans-serif;
+
+  /* Radius — design-spec §3 */
+  --radius-control: 4px; /* Button, Input, Dialog modal — every style/size */
+  --radius-pill: 100px; /* IconButton — literal spec value, not Tailwind's rounded-full */
+
+  /* Border width — design-spec §3. Note: this equals Tailwind's own default
+     `border` utility (1px), so no component code needs this token directly;
+     it's kept for traceability/audit since the brief lists it explicitly. */
+  --border-width-default: 1px;
+
+  /* Shadow — design-spec §3, Dialog modal only (identical across all sizes/variants) */
+  --shadow-dialog:
+    0px 24px 60px rgba(0, 0, 0, 0.12), 0px 8px 20px rgba(0, 0, 0, 0.06);
+
+  /* Sizing & spacing — design-spec §3. Control heights and the two
+     grid-breaking paddings both live under the `--spacing-*` namespace on
+     purpose: that's the single namespace Tailwind draws on for h-*, w-*,
+     size-*, p-*, gap-*, etc., so putting them here is what makes
+     `h-control-lg`, `py-control-py-md`, and similar utilities exist at all.
+
+     Regular paddings/gaps elsewhere in the spec (4, 8, 12, 24, 32) match
+     Tailwind's own default spacing scale exactly (spacing-1/2/3/6/8), so no
+     custom token is needed for those. Only the two values that deliberately
+     break the 4-grid — to make Medium/Small land on exact 36px/24px control
+     heights — get a token, kept at component level rather than forced into
+     a scale. Button and Input share the same vertical-padding sequence, so
+     one pair covers both; IconButton's 11px is single-sourced (Large only —
+     Medium/Small weren't sampled, IconButton isn't a required deliverable,
+     see design-spec §7.8). */
+  --spacing-control-lg: 40px; /* control height, Large */
+  --spacing-control-md: 36px; /* control height, Medium */
+  --spacing-control-sm: 24px; /* control height, Small */
+  --spacing-control-py-md: 7px; /* Button & Input vertical padding, Medium */
+  --spacing-control-py-sm: 3px; /* Button & Input vertical padding, Small */
+  --spacing-iconbutton-p-lg: 11px; /* IconButton padding, all sides, Large only */
 }
