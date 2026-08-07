@@ -90,6 +90,8 @@ describe("semantic tokens resolve to the expected primitive value", () => {
     "color-danger-pressed": "#ec2d30",
     "color-danger-disabled-fill": "#ffccd2",
     "color-danger-disabled-fg": "#f49898",
+    "color-border-divider": "#eeeeee",
+    "color-warning": "#ffad0d",
   };
 
   it.each(Object.entries(semantics))("--%s resolves to %s", (name, expected) => {
@@ -123,6 +125,9 @@ describe("non-color tokens match design-spec.md §2 / §3", () => {
     "spacing-icon-lg": "18px",
     "spacing-icon-md": "16px",
     "spacing-icon-sm": "14px",
+    "spacing-dialog-lg": "900px",
+    "spacing-dialog-md": "600px",
+    "spacing-dialog-sm": "400px",
   };
 
   it.each(Object.entries(nonColorTokens))("--%s is %s", (name, expected) => {

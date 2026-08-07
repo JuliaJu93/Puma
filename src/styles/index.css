@@ -82,6 +82,13 @@
   --color-border-focus: var(--color-brand-500); /* input focus border */
   --color-border-error: var(--color-danger-500); /* input error border */
 
+  /* Same primitive as --color-border-disabled (#eeeeee) but a distinct
+     semantic role — a content separator in Dialog's "With divider" variant
+     (design-spec §6), not a disabled-state indicator. Same reasoning as the
+     Ghost-danger surface tokens above: two unrelated roles that happen to
+     share a value get their own names rather than being folded together. */
+  --color-border-divider: var(--color-neutral-300);
+
   /* Accent (brand) — used as bg on Primary, and as fg+border on Outline/Link */
   --color-accent: var(--color-brand-500);
   --color-accent-hover: var(--color-brand-300);
@@ -138,6 +145,15 @@
 
   /* Overlay — dialog scrim. #000000 (neutral-900) at 30% opacity, design-spec §3. */
   --color-overlay: rgb(0 0 0 / 0.3);
+
+  /* Warning icon tint — Dialog "Warning" variant (design-spec §6). The icon
+     itself is consumer-supplied (Dialog doesn't render it — same "cosmetic
+     slot" pattern as Button's startIcon/endIcon), but it still gets a
+     semantic alias like every other primitive so nothing outside
+     PRIMITIVES ever has to reach for --color-warning-500 directly. The
+     spec itself calls this color single-use, so there's only one role to
+     name. */
+  --color-warning: var(--color-warning-500);
 }
 
 /* ==========================================================================
@@ -216,6 +232,15 @@
   --spacing-icon-lg: 18px;
   --spacing-icon-md: 16px;
   --spacing-icon-sm: 14px;
+
+  /* Dialog Modal width by size — design-spec §3/§6. Fixed px, unlike Button/
+     Input's height scale, so no shared naming with those. Height is left
+     alone (intrinsic/auto per spec — driven by content, not a token). Under
+     --spacing-* for the same reason as everything else here: it's what
+     makes the w-dialog-lg/md/sm utilities exist. */
+  --spacing-dialog-lg: 900px;
+  --spacing-dialog-md: 600px;
+  --spacing-dialog-sm: 400px;
 }
 
 /* ==========================================================================
