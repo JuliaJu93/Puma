@@ -1,0 +1,15 @@
+/**
+ * Cypress component tests remount the React tree per test but never reload
+ * the page, so a color-transition class (`transition-[color,background-color,
+ * border-color] duration-150`) can still be mid-flight when a later test's
+ * assertion reads getComputedStyle — verified empirically: a hover assertion
+ * caught `background-color` 3% of the way through its transition. Forcing
+ * zero-duration here removes that race for every computed-value test without
+ * touching the components themselves (production keeps its real transition).
+ */
+*,
+*::before,
+*::after {
+  transition-duration: 0s !important;
+  animation-duration: 0s !important;
+}

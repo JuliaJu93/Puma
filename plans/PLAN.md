@@ -55,6 +55,8 @@ is a good answer — just be ready to defend the extra dependency.
 
 ## 5. Write the tests
 
+> **Detailed plan → [STEP-5-TESTS.md](STEP-5-TESTS.md)**
+
 Jest for rendering, variants, and clicks. Add `jest-axe` so accessibility is actually
 checked, not just claimed.
 
