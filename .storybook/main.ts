@@ -8,7 +8,10 @@ const config: StorybookConfig = {
     options: {},
   },
   docs: {
-    defaultName: "Docs",
+    defaultName: "Playground",
+  },
+  features: {
+    interactions: false,
   },
 };
 

@@ -20,7 +20,14 @@ export default defineConfig({
       cssFileName: "faster",
     },
     rollupOptions: {
-      external: ["react", "react-dom", "react/jsx-runtime"],
+      external: [
+        "react",
+        "react-dom",
+        "react/jsx-runtime",
+        "class-variance-authority",
+        "clsx",
+        "tailwind-merge",
+      ],
     },
   },
 });

@@ -69,3 +69,19 @@ default Primary button. Fixing it would mean darkening the brand/danger
 scope (`STEP-3-TOKENS.md`: don't invent or adjust spec values). Flagging it
 here is the deliverable; changing the ramp is a decision for whoever owns
 the Figma file.
+
+## Focus ring (added in Step 4, Task 2)
+
+Figma has no distinct focus-visible state for Button (spec §4 lists only
+Default/Hover/Pressed/Disabled), and Input folds focus into a combined
+"Pressed & Focus" state with no separate visible-focus treatment. Neither
+is a substitute for a real `:focus-visible` indicator, so `--focus-ring-color`
+/ `--focus-ring-width` / `--focus-ring-offset` were added net-new to
+`src/styles/index.css` and are applied only via `:focus-visible` (never
+`:focus`, so mouse users don't see them).
+
+The ring reuses `--color-border-focus` (`#15c5ce`) rather than inventing a
+new hue. That inherits the existing known failure above: `#15c5ce` on white
+is 2.12:1 against the 3:1 non-text-contrast threshold. Recorded here rather
+than silently accepted — same underlying palette limitation as the Input
+focus border, not a new problem introduced by the ring itself.

@@ -65,6 +65,8 @@
   /* Surface */
   --color-surface: var(--color-neutral-50); /* base bg: button fills, input field, dialog modal */
   --color-surface-disabled: var(--color-neutral-100); /* Input disabled bg — design-spec §5 */
+  --color-surface-hover: var(--color-neutral-200); /* Ghost-button hover fill — design-spec §4 */
+  --color-surface-pressed: var(--color-neutral-400); /* Ghost-button pressed fill — same primitive as --color-border, different role */
 
   /* Foreground */
   --color-fg: var(--color-neutral-700); /* body text: filled input, Outline/Ghost button, dialog body */
@@ -107,6 +109,14 @@
      or darkens the disabled text into looking active. */
   --color-danger-disabled-fill: var(--color-danger-100); /* Primary-danger disabled bg, Ghost-danger pressed fill */
   --color-danger-disabled-fg: var(--color-danger-200); /* Outline/Link-danger disabled border+text */
+
+  /* Ghost-danger's own hover/pressed fills (design-spec §4). Pressed
+     (`#ffccd2`) is the exact same primitive as --color-danger-disabled-fill
+     above — the spec's own count table lists that hex as serving both roles
+     — but it gets its own semantic name here since "disabled" and "pressed"
+     are unrelated states that only coincidentally share a value. */
+  --color-danger-surface-hover: var(--color-danger-50);
+  --color-danger-surface-pressed: var(--color-danger-100);
 
   /* Decision 2 (design-spec §7.3): Input's disabled text (#e1e1e1) is kept
      as its OWN component-level token rather than folded into the shared
@@ -197,4 +207,22 @@
   --spacing-control-py-md: 7px; /* Button & Input vertical padding, Medium */
   --spacing-control-py-sm: 3px; /* Button & Input vertical padding, Small */
   --spacing-iconbutton-p-lg: 11px; /* IconButton padding, all sides, Large only */
+}
+
+/* ==========================================================================
+   FOCUS RING (Step 4, Task 2 — granted exception)
+   Not present in the Figma file: Button's spec table (§4) only has
+   Default/Hover/Pressed/Disabled, and Input merges focus into a combined
+   "Pressed & Focus" state with no distinct visible-focus treatment. Keyboard
+   users still need a visible non-mouse focus indicator, so this is designed
+   net-new here rather than extracted — an accessibility requirement, not a
+   design preference. Reuses --color-border-focus (the one focus color the
+   file DOES define, for Input) instead of inventing a new hue. See
+   docs/accessibility.md for the contrast note. Applied only via
+   :focus-visible, never :focus, so mouse users never see it.
+   ========================================================================== */
+@theme {
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --focus-ring-color: var(--color-border-focus);
 }

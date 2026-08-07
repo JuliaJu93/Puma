@@ -10,9 +10,8 @@ import { join } from "node:path";
  * Scoped to implementation files only (`.tsx`/`.ts`/`.css`, excluding
  * `.test.`, `.stories.`, and `.cy.` files) — test and Cypress files
  * legitimately assert against computed color values (e.g.
- * `.should("have.css", "color").and("not.equal", "rgb(0, 0, 0)")` in
- * Placeholder.cy.tsx), which isn't the same thing as a component styling
- * itself with a hardcoded color.
+ * `.should("have.css", "color").and("not.equal", "rgb(0, 0, 0)")`), which
+ * isn't the same thing as a component styling itself with a hardcoded color.
  */
 const COMPONENTS_DIR = join(__dirname, "..", "components");
 const HARDCODED_COLOR_PATTERN = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/;

@@ -44,6 +44,8 @@ Tailwind v4 turns these into CSS variables, which makes theming and dark mode ea
 
 ## 4. Build the components
 
+> **Detailed plan → [STEP-4-COMPONENTS.md](STEP-4-COMPONENTS.md)**
+
 Use CVA for variants so they're typed. Every component forwards its ref and accepts
 a `className`.
 

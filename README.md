@@ -2,9 +2,8 @@
 
 Button, Input, and Dialog components for PUMA's Faster design system.
 
-> **Status:** scaffold only. No components exist yet — see [`plans/PLAN.md`](plans/PLAN.md) for the
-> build sequence. The `Placeholder` component below exists solely to prove the toolchain works
-> end to end and will be deleted once real components land.
+> **Status:** in progress — see [`plans/PLAN.md`](plans/PLAN.md) for the build sequence.
+> `Button` is built; `Input` and `Dialog` are next.
 
 ## Requirements
 
@@ -34,11 +33,11 @@ pnpm dev          # Storybook at http://localhost:6006
 ## Using the library
 
 ```tsx
-import { Placeholder } from "@juliaju93/faster-ui";
+import { Button } from "@juliaju93/faster-ui";
 import "@juliaju93/faster-ui/styles.css";
 
 function App() {
-  return <Placeholder label="Hello" />;
+  return <Button variant="primary">Hello</Button>;
 }
 ```
 

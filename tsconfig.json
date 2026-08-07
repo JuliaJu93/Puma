@@ -16,5 +16,5 @@
     "noEmit": true
   },
   "include": ["src", "*.config.ts", "jest.setup.ts", ".storybook"],
-  "exclude": ["cypress", "src/**/*.cy.tsx", "src/**/*.cy.ts"]
+  "exclude": ["cypress", "cypress.config.ts", "src/**/*.cy.tsx", "src/**/*.cy.ts"]
 }
