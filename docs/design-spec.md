@@ -281,6 +281,20 @@ Ghost/danger reacting on Pressed but not Hover; decide whether to replicate or n
 **Radius:** `4px` at every size/style. **Font:** per §2 (weight 500 for Primary, 400 for
 Outline/Ghost/Link).
 
+**Icon size** (correction — the original pass above sampled only the `Left Icon=False,
+Right Icon=False` node per row and never checked a `Left Icon=True` variant, so this was
+missed entirely). Icon size scales with button `Size` — it is **not** a fixed value:
+
+| Size | Icon size | Sampled from (`Left Icon=True, State=Default`, Primary/default) |
+|---|---|---|
+| Large | `18×18` | `absoluteBoundingBox` on the icon instance |
+| Medium | `16×16` | `absoluteBoundingBox` on the icon instance |
+| Small | `14×14` | `absoluteBoundingBox` on the icon instance |
+
+Re-verified across Primary, Outline, and Ghost at all three sizes — the ramp holds regardless
+of style/intent, confirming icon size is a function of `Size` alone, same as the height/padding
+scale in §3.
+
 ### IconButton (not required by the brief, included for completeness — 3 of the 22 frames)
 
 Same states/ramp as Button, but only 3 styles exist (no Link, no danger intent), radius

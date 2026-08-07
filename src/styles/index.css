@@ -207,6 +207,15 @@
   --spacing-control-py-md: 7px; /* Button & Input vertical padding, Medium */
   --spacing-control-py-sm: 3px; /* Button & Input vertical padding, Small */
   --spacing-iconbutton-p-lg: 11px; /* IconButton padding, all sides, Large only */
+
+  /* Button icon size — design-spec §4 "Icon size" correction. Scales with
+     Size (18/16/14), verified across styles/intents; not a fixed value, and
+     not covered by the original Left Icon=False sampling pass. Under
+     --spacing-* for the same reason as the control heights above: it's what
+     makes the size-icon-lg/md/sm utilities exist. */
+  --spacing-icon-lg: 18px;
+  --spacing-icon-md: 16px;
+  --spacing-icon-sm: 14px;
 }
 
 /* ==========================================================================

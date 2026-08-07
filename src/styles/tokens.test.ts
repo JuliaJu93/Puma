@@ -120,6 +120,9 @@ describe("non-color tokens match design-spec.md §2 / §3", () => {
     "spacing-control-py-md": "7px",
     "spacing-control-py-sm": "3px",
     "spacing-iconbutton-p-lg": "11px",
+    "spacing-icon-lg": "18px",
+    "spacing-icon-md": "16px",
+    "spacing-icon-sm": "14px",
   };
 
   it.each(Object.entries(nonColorTokens))("--%s is %s", (name, expected) => {

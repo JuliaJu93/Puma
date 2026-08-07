@@ -110,10 +110,19 @@ export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["var
 export type ButtonIntent = NonNullable<VariantProps<typeof buttonVariants>["intent"]>;
 export type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>;
 
+// design-spec §4 "Icon size" — 18/16/14px, scales with Size and is identical
+// across styles/intents. Forced via [&>svg]:size-full below rather than left
+// to whatever width/height the consumer's SVG happens to declare.
+const ICON_SIZE_CLASS: Record<ButtonSize, string> = {
+  lg: "size-icon-lg",
+  md: "size-icon-md",
+  sm: "size-icon-sm",
+};
+
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">,
     VariantProps<typeof buttonVariants> {
-  /** Cosmetic only — does not change the button's color or geometry (design-spec §4). */
+  /** Cosmetic only (color, choice of icon) — geometry is sized by Button per design-spec §4. */
   startIcon?: ReactNode;
   endIcon?: ReactNode;
   /**
@@ -133,6 +142,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     ref,
   ) => {
     const classes = cn(buttonVariants({ variant, intent, size }), className);
+    const iconClasses = cn("inline-flex shrink-0 [&>svg]:size-full", ICON_SIZE_CLASS[size ?? "md"]);
 
     if (asChild && isValidElement(children)) {
       const child = children as ReactElement<{ className?: string }>;
@@ -144,13 +154,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button ref={ref} type={type} className={classes} {...props}>
         {startIcon && (
-          <span className="inline-flex shrink-0" aria-hidden="true">
+          <span className={iconClasses} aria-hidden="true">
             {startIcon}
           </span>
         )}
         {children}
         {endIcon && (
-          <span className="inline-flex shrink-0" aria-hidden="true">
+          <span className={iconClasses} aria-hidden="true">
             {endIcon}
           </span>
         )}
