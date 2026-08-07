@@ -1,0 +1,56 @@
+import { Meta } from "@storybook/addon-docs/blocks";
+
+<Meta title="Introduction" />
+
+# Faster UI
+
+A small component library built for PUMA's "Faster" task: **Button**, **Input**, and
+**Dialog**. Typed with [class-variance-authority](https://cva.style/docs), styled with
+Tailwind v4 tokens, tested with Jest + Cypress, documented here in Storybook.
+
+Every component reads only from the **semantic** token layer (`--color-accent`,
+`--color-border-error`, …) — never the raw color ramps directly. See
+**Foundations/Tokens** for the full primitive → semantic mapping.
+
+## Install
+
+```bash
+npm install @juliaju93/faster-ui
+```
+
+`react` and `react-dom` (18 or 19) are peer dependencies — installed already in any
+React app, so nothing extra to add there.
+
+## The two imports every consumer needs
+
+```tsx
+import { Button } from "@juliaju93/faster-ui";
+import "@juliaju93/faster-ui/styles.css";
+```
+
+The stylesheet import is easy to forget — without it every component still renders,
+but with **no styling at all**: no colors, no spacing, no focus ring. It only needs
+to be imported once, anywhere in your app's entry point.
+
+```tsx
+import { Button, Input, Dialog } from "@juliaju93/faster-ui";
+import "@juliaju93/faster-ui/styles.css";
+
+function Example() {
+  return <Button variant="primary">Save changes</Button>;
+}
+```
+
+## Where to look next
+
+- **Foundations/Tokens** — the primitive and semantic color/spacing/type scale every
+  component is built from.
+- **Components/Button**, **Components/Input**, **Components/Dialog** — each has a
+  `Playground` story with every prop exposed as a control, plus stories for every
+  variant, state, and layout.
+
+## Accessibility
+
+Contrast gaps that trace back to the source design values (not introduced by this
+library) are recorded in `docs/accessibility.md` in the repo, and reflected here via
+the a11y addon panel on every story.

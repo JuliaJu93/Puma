@@ -1,9 +1,11 @@
-# @juliaju93/faster-ui
+# @kashlewa.ju93/faster-ui
+
+[![CI](https://github.com/JuliaJu93/Puma/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaJu93/Puma/actions/workflows/ci.yml)
 
 Button, Input, and Dialog components for PUMA's Faster design system.
 
-> **Status:** in progress — see [`plans/PLAN.md`](plans/PLAN.md) for the build sequence.
-> `Button` is built; `Input` and `Dialog` are next.
+Storybook: https://juliaju93.github.io/Puma/ (live once GitHub Pages is enabled — see
+[`plans/STEP-7-CI.md`](plans/STEP-7-CI.md)).
 
 ## Requirements
 
@@ -33,8 +35,8 @@ pnpm dev          # Storybook at http://localhost:6006
 ## Using the library
 
 ```tsx
-import { Button } from "@juliaju93/faster-ui";
-import "@juliaju93/faster-ui/styles.css";
+import { Button } from "@kashlewa.ju93/faster-ui";
+import "@kashlewa.ju93/faster-ui/styles.css";
 
 function App() {
   return <Button variant="primary">Hello</Button>;
@@ -63,9 +65,17 @@ versions actually support:
   output-count tradeoff to confirm rather than guess. Decision: keep the single-bundle output —
   simpler `dist/`, fewer files to publish and reason about. Revisit if bundle size becomes a real
   concern once Button/Input/Dialog exist.
+- **`human-id` is pinned to `1.0.2` via a pnpm override.** `@changesets/cli` depends on
+  `human-id@^4.1.1`, which shipped as ESM-only and crashes every `changeset` CLI command
+  (`ERR_REQUIRE_ESM`) when required from the CLI's CJS code. `1.0.2` is the last release with the
+  same API and a CommonJS build. Upstream issue: changesets/changesets.
 
-## Open questions
+## Releasing
 
-1. **npm package name.** `faster` and `faster-ui` are taken on npm. This package currently
-   publishes as `@juliaju93/faster-ui` as a placeholder — confirm the scope before actually
-   publishing.
+Versioning and publishing go through [Changesets](https://github.com/changesets/changesets):
+
+1. Add a changeset with `pnpm changeset` describing the change.
+2. On merge to `main`, CI opens a "Version Packages" PR bumping versions and updating
+   `CHANGELOG.md`.
+3. Merging that PR publishes to npm, provided the `NPM_TOKEN` repository secret is set.
+   Without it, the release job still runs and stays green, it just skips the publish step.

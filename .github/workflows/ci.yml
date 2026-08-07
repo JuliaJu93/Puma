@@ -1,0 +1,183 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    name: Quality (lint, typecheck, test, build)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Jest tests
+        run: pnpm test
+
+      - name: Build package
+        run: pnpm build
+
+      - name: Verify packaging invariants
+        run: |
+          set -eu
+
+          for f in dist/index.js dist/index.cjs dist/index.d.ts dist/faster.css; do
+            if [ ! -f "$f" ]; then
+              echo "::error::Expected build output missing: $f"
+              exit 1
+            fi
+          done
+
+          if ! grep -q 'from "react"' dist/index.js; then
+            echo "::error::dist/index.js does not import react as an external — it may have been bundled"
+            exit 1
+          fi
+          if ! grep -q 'require("react")' dist/index.cjs; then
+            echo "::error::dist/index.cjs does not require react as an external — it may have been bundled"
+            exit 1
+          fi
+          if grep -q 'react.element' dist/index.js dist/index.cjs; then
+            echo "::error::dist output contains react internals — react appears to be bundled"
+            exit 1
+          fi
+
+  e2e:
+    name: Cypress component tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Cypress component tests
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          component: true
+          browser: chrome
+
+  storybook:
+    name: Build Storybook
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build Storybook
+        run: pnpm build-storybook
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static
+          retention-days: 7
+
+  release:
+    name: Release
+    needs: [quality, e2e, storybook]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    env:
+      HAS_NPM_TOKEN: ${{ secrets.NPM_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+          registry-url: https://registry.npmjs.org
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Build package
+        run: pnpm build
+
+      - name: Create release PR or publish to npm
+        if: env.HAS_NPM_TOKEN == 'true'
+        uses: changesets/action@v1
+        with:
+          publish: pnpm changeset publish
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
+
+      - name: Skip publish (no NPM_TOKEN configured)
+        if: env.HAS_NPM_TOKEN != 'true'
+        run: echo "NPM_TOKEN secret not set — skipping release. Add it in repo settings to enable publishing."
+
+  pages:
+    name: Deploy Storybook to Pages
+    needs: [quality, e2e, storybook]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      # download-artifact@v4 calls the Actions API, so it needs `actions: read`.
+      # Job-level `permissions` REPLACES the workflow default rather than merging
+      # with it, so every scope this job needs must be listed here explicitly.
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: storybook-static
+          path: storybook-static
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: storybook-static
+
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -74,6 +74,8 @@ where everything is adjustable.
 
 ## 7. Set up CI
 
+> **Detailed plan → [STEP-7-CI.md](STEP-7-CI.md)**
+
 One GitHub Actions workflow: install, lint, typecheck, Jest, Cypress, build Storybook,
 build the package, publish to npm.
 
