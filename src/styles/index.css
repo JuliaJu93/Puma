@@ -222,7 +222,14 @@
   --spacing-control-sm: 24px; /* control height, Small */
   --spacing-control-py-md: 7px; /* Button & Input vertical padding, Medium */
   --spacing-control-py-sm: 3px; /* Button & Input vertical padding, Small */
-  --spacing-iconbutton-p-lg: 11px; /* IconButton padding, all sides, Large only */
+  /* IconButton padding, all sides — design-spec §4 correction. Medium/Small
+     were flagged as never sampled (open question §7.8); now verified: 10px
+     / 5px, consistent across Primary/Outline/Ghost. Square dimensions reuse
+     --spacing-control-lg/md/sm above (40/36/24 — same numbers, confirmed
+     against IconButton's own absoluteBoundingBox, not assumed). */
+  --spacing-iconbutton-p-lg: 11px;
+  --spacing-iconbutton-p-md: 10px;
+  --spacing-iconbutton-p-sm: 5px;
 
   /* Button icon size — design-spec §4 "Icon size" correction. Scales with
      Size (18/16/14), verified across styles/intents; not a fixed value, and
@@ -232,6 +239,18 @@
   --spacing-icon-lg: 18px;
   --spacing-icon-md: 16px;
   --spacing-icon-sm: 14px;
+
+  /* Button min-width — design-spec §4 "Min-width and Link's box" correction.
+     Primary/Outline/Ghost only — Link has no padding/fixed-height/min-width
+     at all (it's plain text). Content-area guide line (90/82/54) plus the
+     size's own L/R padding ×2, since Tailwind's min-w-* applies to the
+     button's border box, not an inner frame the way Figma structures it.
+     Named --spacing-button-{size} (not -min-w-{size}) because Tailwind
+     derives the utility as `min-w-` + this key verbatim — a key that
+     already contains "min-w" would double up into min-w-button-min-w-lg. */
+  --spacing-button-lg: 106px;
+  --spacing-button-md: 98px;
+  --spacing-button-sm: 62px;
 
   /* Dialog Modal width by size — design-spec §3/§6. Fixed px, unlike Button/
      Input's height scale, so no shared naming with those. Height is left

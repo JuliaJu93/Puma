@@ -87,6 +87,20 @@ jobs:
           component: true
           browser: chrome
 
+      # Cypress writes a screenshot per failed test. Without this the job log
+      # is the only evidence, and it isn't readable via the API without admin
+      # rights — which is exactly the wall we hit diagnosing the first failure.
+      - name: Upload failure artifacts
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-failures
+          path: |
+            cypress/screenshots
+            cypress/videos
+          if-no-files-found: ignore
+          retention-days: 7
+
   storybook:
     name: Build Storybook
     runs-on: ubuntu-latest

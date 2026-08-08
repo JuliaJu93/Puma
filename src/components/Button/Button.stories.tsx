@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { CSSProperties, MouseEvent, ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { Button, type ButtonIntent, type ButtonProps, type ButtonVariant } from "./Button";
 
@@ -10,6 +10,12 @@ import { Button, type ButtonIntent, type ButtonProps, type ButtonVariant } from 
  * text color for free across every variant/intent/state.
  */
 const ICONS = {
+  plus: (
+    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  ),
   star: (
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
@@ -23,12 +29,6 @@ const ICONS = {
   check: (
     <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
       <polyline points="20 6 9 17 4 12" />
-    </svg>
-  ),
-  plus: (
-    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19" />
-      <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   ),
   arrowRight: (
@@ -47,6 +47,7 @@ interface ButtonPlaygroundProps
   extends Omit<ButtonProps, "startIcon" | "endIcon" | "children" | "asChild"> {
   /** Content group */
   label: string;
+  link: boolean;
   /** Styling group */
   icon: IconName;
   iconEnd: boolean;
@@ -61,20 +62,38 @@ interface ButtonPlaygroundProps
 // just flipping direction on the same English word.
 const ARABIC_LABEL = "زر";
 
-function ButtonPlayground({ label, icon, iconEnd, mode, round, rtl, ...props }: ButtonPlaygroundProps) {
+function ButtonPlayground({ label, icon, iconEnd, link, mode, round, rtl, ...props }: ButtonPlaygroundProps) {
   const iconNode = ICONS[icon];
   const isIconOnly = mode === "icon";
   const displayLabel = rtl ? ARABIC_LABEL : label;
+
+  // asChild (link mode) clones the child as-is and only merges className —
+  // see Button.tsx — so an icon-only link needs its own aria-label rather
+  // than relying on Button to forward one.
+  const linkChild = (
+    <a
+      href="/"
+      aria-label={isIconOnly ? displayLabel : undefined}
+      onClick={(e) => {
+        e.preventDefault();
+        alert("Navigate to /");
+      }}
+    >
+      {isIconOnly ? iconNode : displayLabel}
+    </a>
+  );
+
   return (
     <div dir={rtl ? "rtl" : "ltr"}>
       <Button
         {...props}
-        aria-label={isIconOnly ? displayLabel : undefined}
+        asChild={link}
+        aria-label={!link && isIconOnly ? displayLabel : undefined}
         className={round ? "rounded-pill" : undefined}
-        startIcon={isIconOnly || !iconEnd ? iconNode : undefined}
-        endIcon={!isIconOnly && iconEnd ? iconNode : undefined}
+        startIcon={!link && (isIconOnly || !iconEnd) ? iconNode : undefined}
+        endIcon={!link && !isIconOnly && iconEnd ? iconNode : undefined}
       >
-        {isIconOnly ? undefined : displayLabel}
+        {link ? linkChild : isIconOnly ? undefined : displayLabel}
       </Button>
     </div>
   );
@@ -85,11 +104,12 @@ const meta: Meta<typeof ButtonPlayground> = {
   component: ButtonPlayground,
   args: {
     label: "Button",
+    link: false,
     variant: "primary",
     intent: "default",
     size: "md",
     disabled: false,
-    icon: "star",
+    icon: "plus",
     iconEnd: false,
     mode: "text",
     round: false,
@@ -101,6 +121,11 @@ const meta: Meta<typeof ButtonPlayground> = {
       control: "text",
       description: "Sets the text label of the component",
       table: { category: "Content" },
+    },
+    link: {
+      control: "boolean",
+      description: "Renders via the asChild escape hatch as a real <a> instead of a <button> — see Button.tsx.",
+      table: { category: "Content", defaultValue: { summary: "false" } },
     },
     // Styling
     variant: {
@@ -182,7 +207,7 @@ const cellStyle: CSSProperties = {
 
 function ButtonVariations() {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 32, fontFamily: "sans-serif" }}>
+    <div style={{ display: "flex", flexDirection: "column", gap: 60, fontFamily: "sans-serif" }}>
       <table style={{ borderCollapse: "collapse" }}>
         <thead>
           <tr>
@@ -200,44 +225,59 @@ function ButtonVariations() {
           </tr>
         </thead>
         <tbody>
-          {VARIANTS.map((variant) => (
-            <tr key={variant}>
-              <td style={{ ...headerCellStyle, padding: "8px 16px 8px 0" }}>{variant}</td>
-              {INTENTS.map((intent) => (
-                <td key={`${variant}-${intent}`} style={cellStyle}>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <Button variant={variant} intent={intent}>
-                      Button
-                    </Button>
-                    <Button
-                      variant={variant}
-                      intent={intent}
-                      startIcon={ICONS.plus}
-                      aria-label="Button"
-                      className="rounded-pill"
-                    />
-                  </div>
-                </td>
-              ))}
-              {INTENTS.map((intent) => (
-                <td key={`${variant}-${intent}-disabled`} style={cellStyle}>
-                  <div style={{ display: "flex", gap: 8 }}>
-                    <Button variant={variant} intent={intent} disabled>
-                      Button
-                    </Button>
-                    <Button
-                      variant={variant}
-                      intent={intent}
-                      disabled
-                      startIcon={ICONS.plus}
-                      aria-label="Button"
-                      className="rounded-pill"
-                    />
-                  </div>
-                </td>
-              ))}
-            </tr>
-          ))}
+          {VARIANTS.map((variant) => {
+            // Link is plain text sized to its own content (design-spec §4 "Min-width
+            // and Link's box"), so its row is intrinsically narrower than Primary/
+            // Outline/Ghost's padded, min-width boxes. Reserving the same footprint
+            // as the other rows (98px text button + 8px gap + 36px icon-only, at the
+            // default md size) keeps every row's buttons starting at the same column
+            // position instead of the row collapsing to Link's own narrow width.
+            const rowStyle: CSSProperties = { display: "flex", gap: 8, minWidth: 142 };
+            const onLinkClick =
+              variant === "link"
+                ? (e: MouseEvent) => {
+                    e.preventDefault();
+                    alert("Navigate to /");
+                  }
+                : undefined;
+            return (
+              <tr key={variant}>
+                <td style={{ ...headerCellStyle, padding: "12px 20px 12px 0" }}>{variant}</td>
+                {INTENTS.map((intent) => (
+                  <td key={`${variant}-${intent}`} style={cellStyle}>
+                    <div style={rowStyle}>
+                      <Button variant={variant} intent={intent} startIcon={ICONS.plus} onClick={onLinkClick}>
+                        Button
+                      </Button>
+                      <Button
+                        variant={variant}
+                        intent={intent}
+                        startIcon={ICONS.plus}
+                        aria-label="Button"
+                        onClick={onLinkClick}
+                      />
+                    </div>
+                  </td>
+                ))}
+                {INTENTS.map((intent) => (
+                  <td key={`${variant}-${intent}-disabled`} style={cellStyle}>
+                    <div style={rowStyle}>
+                      <Button variant={variant} intent={intent} disabled startIcon={ICONS.plus}>
+                        Button
+                      </Button>
+                      <Button
+                        variant={variant}
+                        intent={intent}
+                        disabled
+                        startIcon={ICONS.plus}
+                        aria-label="Button"
+                      />
+                    </div>
+                  </td>
+                ))}
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 
@@ -253,7 +293,7 @@ function ButtonVariations() {
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
           <span style={{ fontSize: 12, fontWeight: 600, width: 100 }}>Sizes (icon)</span>
           {SIZES.map((size) => (
-            <Button key={size} size={size} startIcon={ICONS.plus} aria-label={size} className="rounded-pill" />
+            <Button key={size} size={size} startIcon={ICONS.plus} aria-label={size} />
           ))}
         </div>
       </div>

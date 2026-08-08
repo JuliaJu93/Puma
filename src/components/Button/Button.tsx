@@ -31,7 +31,7 @@ const buttonVariants = cva(
   // rule in Storybook. Leaving outline-color out of the transition means
   // the ring appears instantly, which is the standard, expected behaviour
   // for a focus indicator anyway.
-  "inline-flex items-center justify-center gap-1 rounded-control font-sans outline-none transition-[color,background-color,border-color] duration-150 focus-visible:[outline:var(--focus-ring-width)_solid_var(--focus-ring-color)] focus-visible:outline-offset-[var(--focus-ring-offset)] disabled:cursor-not-allowed",
+  "inline-flex items-center justify-center gap-1 rounded-control font-sans outline-none transition-[color,background-color,border-color] duration-150 cursor-pointer focus-visible:[outline:var(--focus-ring-width)_solid_var(--focus-ring-color)] focus-visible:outline-offset-[var(--focus-ring-offset)] disabled:cursor-not-allowed",
   {
     variants: {
       variant: {
@@ -45,12 +45,20 @@ const buttonVariants = cva(
         danger: "",
       },
       size: {
-        sm: "h-control-sm px-1 py-control-py-sm text-control-sm",
-        md: "h-control-md px-2 py-control-py-md text-control-md",
-        lg: "h-control-lg px-2 py-2 text-control-lg",
+        sm: "h-control-sm min-w-button-sm px-1 py-control-py-sm text-control-sm",
+        md: "h-control-md min-w-button-md px-2 py-control-py-md text-control-md",
+        lg: "h-control-lg min-w-button-lg px-2 py-2 text-control-lg",
       },
     },
     compoundVariants: [
+      {
+        // design-spec §4 "Min-width and Link's box": Link has no padding, no
+        // fixed height, and no min-width — it's plain text sized to its own
+        // content, not a padded control box like the other three styles.
+        variant: "link",
+        size: ["sm", "md", "lg"],
+        class: "h-auto min-w-0 p-0",
+      },
       {
         variant: "primary",
         intent: "default",
@@ -119,6 +127,20 @@ const ICON_SIZE_CLASS: Record<ButtonSize, string> = {
   sm: "size-icon-sm",
 };
 
+// design-spec §4 "Padding and square dimensions" (IconButton). A Button with
+// no visible children — only startIcon/endIcon, e.g. an icon-only close or
+// menu trigger — is a different shape than a text button at the same Size:
+// square (40/36/24, matching --spacing-control-* exactly) with its own
+// 11/10/5px padding and a pill radius, not the text box's height/min-width/
+// padding/corner-radius. Applied automatically from content, not a prop:
+// this is what an icon-only Button already looks like when built correctly,
+// not an opt-in variant.
+const ICON_ONLY_CLASS: Record<ButtonSize, string> = {
+  lg: "size-control-lg min-w-0 p-iconbutton-p-lg",
+  md: "size-control-md min-w-0 p-iconbutton-p-md",
+  sm: "size-control-sm min-w-0 p-iconbutton-p-sm",
+};
+
 export interface ButtonProps
   extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">,
     VariantProps<typeof buttonVariants> {
@@ -141,8 +163,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     { className, variant, intent, size, startIcon, endIcon, asChild = false, type = "button", children, ...props },
     ref,
   ) => {
-    const classes = cn(buttonVariants({ variant, intent, size }), className);
-    const iconClasses = cn("inline-flex shrink-0 [&>svg]:size-full", ICON_SIZE_CLASS[size ?? "md"]);
+    const resolvedSize = size ?? "md";
+    const isIconOnly = !children && Boolean(startIcon || endIcon);
+    const classes = cn(
+      buttonVariants({ variant, intent, size }),
+      isIconOnly && ["rounded-pill", ICON_ONLY_CLASS[resolvedSize]],
+      className,
+    );
+    const iconClasses = cn("inline-flex shrink-0 [&>svg]:size-full", ICON_SIZE_CLASS[resolvedSize]);
 
     if (asChild && isValidElement(children)) {
       const child = children as ReactElement<{ className?: string }>;

@@ -281,6 +281,35 @@ Ghost/danger reacting on Pressed but not Hover; decide whether to replicate or n
 **Radius:** `4px` at every size/style. **Font:** per §2 (weight 500 for Primary, 400 for
 Outline/Ghost/Link).
 
+**Min-width and Link's box** (correction — every node listed in the table above has a
+`layoutSizingHorizontal: "HUG"` auto-layout frame, so the original pass took its
+`absoluteBoundingBox` at face value as "the" width. That's only the *rendered* width for
+whatever placeholder text happens to be in that instance — it missed a `" Min Width"` guide
+line embedded as a sibling inside the Primary/Outline/Ghost components, and never checked
+whether Link's frame actually carries padding at all):
+
+- **Primary, Outline, and Ghost share one min-width constraint**, verified identical across
+  all three styles (not text-width-dependent — same value regardless of the ~1px render
+  difference between Primary's weight-500 "Text" and Outline/Ghost's weight-400 one):
+
+  | Size | Content-area min-width (the guide line) | + padding ×2 = outer button min-width |
+  |---|---|---|
+  | Large | `90px` | `90 + 16 = 106px` |
+  | Medium | `82px` | `82 + 16 = 98px` |
+  | Small | `54px` | `54 + 8 = 62px` |
+
+  No min-width line exists on Link's component at any size — consistent with the next finding.
+
+- **Link has no padding and no fixed height at all.** Its component has none of
+  `paddingLeft/Right/Top/Bottom` set (absent from the API response, not zero-valued), and its
+  `absoluteBoundingBox.height` is exactly the text line-height for that size (24 / 22 / 18px —
+  §2's `text-control-{lg,md,sm}--line-height`, not the 40/36/24 control heights every other
+  style uses). Link is genuinely just colored text sized to its own content, not a padded
+  control box like the other three styles. Building it with the same height/padding/min-width
+  as Primary/Outline/Ghost — which is what an implementation that treats "Size" as one shared
+  geometry axis across all styles would naturally do — is a real, verified mismatch, not a
+  simplification.
+
 **Icon size** (correction — the original pass above sampled only the `Left Icon=False,
 Right Icon=False` node per row and never checked a `Left Icon=True` variant, so this was
 missed entirely). Icon size scales with button `Size` — it is **not** a fixed value:
@@ -316,9 +345,26 @@ Primary via the icon SVG fill).
 | Ghost | Pressed | `#e1e1e1` | — | `15:20831` |
 | Ghost | Disabled | transparent | — | `15:20825` |
 
-Padding sampled at Large = `11px` all sides (`15:20369`). Medium/Small padding was not
-sampled since IconButton isn't a required deliverable — flagged in Open Questions if it's
-ever needed.
+**Padding and square dimensions** (correction — Medium/Small were previously flagged as never
+sampled, §7.8. Now verified, consistent across Primary/Outline/Ghost):
+
+| Size | Square dimensions | Padding, all sides | Inner icon (dimensions − padding×2) |
+|---|---|---|---|
+| Large | `40×40` | `11px` | `18×18` — matches Button's own Large icon size (§4 above) |
+| Medium | `36×36` | `10px` | `16×16` — matches Button's Medium icon size |
+| Small | `24×24` | `5px` | `14×14` — matches Button's Small icon size |
+
+The square dimensions are the same numbers as Button's own control heights (§3) — not a
+coincidence worth re-deriving as a separate token, just confirmed directly against
+IconButton's `absoluteBoundingBox` rather than assumed. **This is why an icon-only `Button`
+(no visible children, only `startIcon`/`endIcon`) must switch to this geometry rather than
+reusing Button's own text-box padding/min-width/height**: a `<Button>` with no label rendered
+at Button's normal geometry produces neither a valid Button (there's no min-width case for
+"empty content") nor a valid IconButton (wrong padding, wrong shape, and picks up the
+min-width fix above — which is correct for a *text* button avoiding a too-narrow label, but
+actively wrong for an icon-only one, since it would force a non-square box). IconButton is
+still not a separately exported component per the brief — this geometry only applies to
+`Button` when it has no visible text content.
 
 ---
 
@@ -449,9 +495,12 @@ away.
    (or `danger`) boolean/enum prop on one `Button` component rather than a second component —
    but that's an implementation decision this spec doesn't make for you.
 
-8. **IconButton has no Link style and no danger intent** in this file, and its Medium/Small
-   padding wasn't sampled (only Large, since IconButton isn't a required component for this
-   task). If IconButton gets built, padding for Medium/Small needs a fresh API check.
+8. ~~IconButton has no Link style and no danger intent in this file, and its Medium/Small
+   padding wasn't sampled~~ — **resolved**: Medium/Small padding verified (10px / 5px,
+   consistent across Primary/Outline/Ghost) and documented in §4 IconButton. No Link style
+   and no danger intent remain genuinely absent from the file — an icon-only `Button` should
+   support only the variant/intent combinations Button itself supports; there's no Figma
+   reference for icon-only Link or icon-only danger-Link.
 
 9. **Published Figma styles are empty** (`GET /v1/files/.../styles` returned
    `meta.styles: []`) — this is a duplicated community file where the original styles weren't
