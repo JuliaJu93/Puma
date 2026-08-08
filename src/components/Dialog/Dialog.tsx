@@ -77,11 +77,16 @@ export const DialogHeader = forwardRef<HTMLDivElement, DialogHeaderProps>(({ cla
     <div
       ref={ref}
       className={cn(
-        "flex items-start justify-between gap-4 pb-4",
-        // Header-to-body gap (16px) isn't in the spec — Figma only gives the
-        // 32px content-to-footer gap (design-spec §3) — so this is a net-new
-        // judgment call, not an extracted value.
-        divided && "border-b border-border-divider",
+        // Verified against the raw Figma nodes (Content frame itemSpacing):
+        // 16px title-to-body gap, 8px title-to-close gap — both hold at
+        // every size, not a judgment call.
+        "flex items-start justify-between gap-2 pb-4",
+        // The With-divider variant's line spans the card's full width, not
+        // just this padded content area (verified: the divider node's own
+        // width equals the Modal's, not Content's) — -mx-6/px-6 cancel and
+        // reapply Content's p-6 so the border sits flush with the card
+        // edge while the title/close stay inset the same as always.
+        divided && "-mx-6 border-b border-border-divider px-6",
         className,
       )}
       {...props}
@@ -132,8 +137,13 @@ export const DialogFooter = forwardRef<HTMLDivElement, DialogFooterProps>(({ cla
     <div
       ref={ref}
       className={cn(
-        "flex items-center justify-end gap-2 pt-8", // 32px content-to-footer gap — design-spec §3
-        divided && "border-t border-border-divider",
+        "flex items-center justify-end gap-2",
+        // 32px content-to-footer gap (design-spec §3) — but verified against
+        // the raw Figma nodes, that's only true without a divider line; the
+        // With-divider variant's own gap either side of its lines is 16px,
+        // not 32 (the line itself already provides visual separation). Same
+        // -mx-6/px-6 full-bleed trick as DialogHeader for the line itself.
+        divided ? "-mx-6 border-t border-border-divider px-6 pt-4" : "pt-8",
         className,
       )}
       {...props}
@@ -166,8 +176,12 @@ export const DialogClose = forwardRef<HTMLButtonElement, DialogCloseProps>(
       {...props}
     >
       {children ?? (
-        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
-          <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+        // design-spec §6: Figma's close icon is a single-fill "Union"
+        // vector with no stroke — a bold filled × (two crossing bars
+        // merged into one shape), not a thin stroked line ×. Verified: 14×14
+        // at every dialog size (unlike Input's icons, this one doesn't scale).
+        <svg viewBox="0 0 24 24" width="14" height="14" fill="currentColor" aria-hidden="true">
+          <path d="M6.4 19 5 17.6 10.6 12 5 6.4 6.4 5 12 10.6 17.6 5 19 6.4 13.4 12 19 17.6 17.6 19 12 13.4Z" />
         </svg>
       )}
     </DialogPrimitive.Close>

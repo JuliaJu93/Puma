@@ -104,11 +104,13 @@ const CLEAR_ICON_SIZE_CLASS: Record<InputSize, string> = {
 // internal spacing between those children (icon↔text, text↔clear) —
 // verified as its own 8/8/4 ramp against the raw Figma nodes, distinct from
 // the 12/12/8 outer padding ramp (both real, independently sampled values,
-// not derived from one another).
+// not derived from one another). Uses the fixed-px gap-input-gap-* utilities
+// (see --spacing-input-gap-* in index.css) rather than Tailwind's default
+// gap-1/gap-2 — those are rem-relative, and this value is a literal Figma px.
 const CORE_SIZE_CLASS: Record<InputSize, string> = {
-  sm: "gap-1 px-2 py-control-py-sm",
-  md: "gap-2 px-3 py-control-py-md",
-  lg: "gap-2 px-3 py-2",
+  sm: "gap-input-gap-sm px-2 py-control-py-sm",
+  md: "gap-input-gap-md px-3 py-control-py-md",
+  lg: "gap-input-gap-lg px-3 py-2",
 };
 
 // Horizontal-only — the affix segment has no vertical padding of its own
@@ -284,7 +286,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     }
 
     return (
-      <div className="flex flex-col items-start gap-1">
+      <div className="flex flex-col items-start gap-input-stack-gap">
         {label && (
           // Label typography/spacing is net-new (design-spec §5 / §7.5 — no
           // label exists in Figma). Reuses existing tokens only: sized down

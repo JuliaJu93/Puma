@@ -58,7 +58,12 @@ describe("Input", () => {
     it("shows a ring around the wrapper on real keyboard focus", () => {
       cy.mount(<Input aria-label="Name" />);
       cy.realPress("Tab");
+      // input -> core row (icons/input/clear/stepper) -> the actual bordered
+      // field wrapper. Prefix/Suffix need their own background reaching the
+      // wrapper's full height (see Input.tsx's CORE_SIZE_CLASS comment), so
+      // the border/bg/ring now live two levels up, not one.
       cy.get("input")
+        .parent()
         .parent()
         .should("have.css", "outline-style", "solid")
         .and("have.css", "outline-color", "rgb(21, 197, 206)"); // --focus-ring-color, brand-500 #15c5ce
@@ -73,7 +78,7 @@ describe("Input", () => {
       // component bug, so asserted as the real, deliberate difference it is.
       cy.mount(<Input aria-label="Name" />);
       cy.get("input").realClick();
-      cy.get("input").parent().should("have.css", "outline-style", "solid");
+      cy.get("input").parent().parent().should("have.css", "outline-style", "solid");
     });
   });
 
@@ -81,6 +86,7 @@ describe("Input", () => {
     it("default: white background, neutral border", () => {
       cy.mount(<Input aria-label="Name" />);
       cy.get("input")
+        .parent()
         .parent()
         .should("have.css", "background-color", "rgb(255, 255, 255)")
         .and("have.css", "border-color", "rgb(225, 225, 225)"); // #e1e1e1
@@ -90,6 +96,7 @@ describe("Input", () => {
       cy.mount(<Input aria-label="Name" error="Required" defaultValue="x" />);
       cy.get("input")
         .parent()
+        .parent()
         .should("have.css", "border-color", "rgb(246, 76, 76)") // #f64c4c
         .and("have.css", "background-color", "rgb(255, 255, 255)");
       cy.contains("Required").should("have.css", "color", "rgb(246, 76, 76)");
@@ -98,6 +105,7 @@ describe("Input", () => {
     it("disabled: muted background, muted border, muted text — and wins over error", () => {
       cy.mount(<Input aria-label="Name" error="Required" disabled defaultValue="x" />);
       cy.get("input")
+        .parent()
         .parent()
         .should("have.css", "background-color", "rgb(250, 250, 250)") // #fafafa
         .and("have.css", "border-color", "rgb(238, 238, 238)") // #eeeeee, not the error red
@@ -114,9 +122,14 @@ describe("Input", () => {
           <Input aria-label="Large" size="lg" />
         </div>,
       );
-      cy.get("input[aria-label=Small]").parent().should("have.css", "height", "24px");
-      cy.get("input[aria-label=Medium]").parent().should("have.css", "height", "36px");
-      cy.get("input[aria-label=Large]").parent().should("have.css", "height", "40px");
+      // .parent().parent(): the actual h-control-* wrapper, two levels up
+      // from input (see the focus-ring describe block above) — checking
+      // just .parent() (the core row) happens to read the same height here
+      // only because its padding + line-height are tuned to sum to it, not
+      // because it's the element the height token is actually set on.
+      cy.get("input[aria-label=Small]").parent().parent().should("have.css", "height", "24px");
+      cy.get("input[aria-label=Medium]").parent().parent().should("have.css", "height", "36px");
+      cy.get("input[aria-label=Large]").parent().parent().should("have.css", "height", "40px");
     });
   });
 });

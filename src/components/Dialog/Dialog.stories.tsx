@@ -6,13 +6,13 @@ import { Dialog, type DialogSize } from "./Dialog";
  * Storybook-only icon (design-spec §6: the Warning variant's icon is
  * consumer-supplied — Dialog itself never renders it, same "cosmetic slot"
  * rationale as Button's startIcon/endIcon). Uses --color-warning, the one
- * semantic alias that exists purely for this single-use primitive.
+ * semantic alias that exists purely for this single-use primitive. 16×16 and
+ * a solid fill (not a stroked outline) — verified against the raw Figma
+ * node (the "Attention" icon instance is a single-fill vector, no stroke).
  */
 const WarningIcon = (
-  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0 text-warning">
-    <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z" />
-    <line x1="12" y1="9" x2="12" y2="13" />
-    <line x1="12" y1="17" x2="12.01" y2="17" />
+  <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" className="shrink-0 text-warning">
+    <path fillRule="evenodd" d="M1 21h22L12 2 1 21Zm12-3h-2v-2h2v2Zm0-4h-2v-4h2v4Z" />
   </svg>
 );
 

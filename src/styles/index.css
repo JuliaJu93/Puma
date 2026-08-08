@@ -279,6 +279,23 @@
   --spacing-clear-icon-md: 14px;
   --spacing-clear-icon-sm: 12px;
 
+  /* Input's internal gap (icon↔text, text↔clear button) — design-spec §5,
+     verified against the raw Figma nodes. Fixed px per size (8/8/4), not
+     Tailwind's default gap-1/gap-2 utilities: those resolve to
+     calc(var(--spacing) * N), a value relative to the rem-based --spacing
+     variable, whereas Figma's own number is an absolute px independent of
+     root font-size. Everything sourced from Figma gets a literal px value
+     for that reason — this just hadn't been split out from the default
+     scale yet. */
+  --spacing-input-gap-lg: 8px;
+  --spacing-input-gap-md: 8px;
+  --spacing-input-gap-sm: 4px;
+
+  /* Vertical rhythm of Input's own label/field/error-message stack — 4px,
+     fixed px rather than Tailwind's default gap-1 (calc(var(--spacing) * 1),
+     rem-relative) for the same reason as --spacing-input-gap-* above. */
+  --spacing-input-stack-gap: 4px;
+
   /* Button min-width — design-spec §4 "Min-width and Link's box" correction.
      Primary/Outline/Ghost only — Link has no padding/fixed-height/min-width
      at all (it's plain text). Content-area guide line (90/82/54) plus the
