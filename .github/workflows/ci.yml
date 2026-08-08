@@ -80,6 +80,25 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # The Cypress binary lives in ~/.cache/Cypress, NOT in the pnpm store —
+      # so setup-node's `cache: pnpm` does not cover it. On a cold cache the
+      # postinstall downloads it and everything works; on a warm cache pnpm
+      # restores packages from the store without re-running postinstall, and
+      # the binary is simply absent. That is why this job passed its first run
+      # and failed the second.
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: cypress-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: cypress-${{ runner.os }}-
+
+      # Idempotent: a no-op when the binary is already present (cache hit),
+      # and downloads it when it isn't. This is the step that makes the job
+      # correct regardless of cache state.
+      - name: Ensure Cypress binary
+        run: pnpm exec cypress install
+
       - name: Cypress component tests
         uses: cypress-io/github-action@v6
         with:
