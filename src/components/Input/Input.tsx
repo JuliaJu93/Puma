@@ -42,7 +42,18 @@ const inputWrapperVariants = cva(
       {
         error: false,
         disabled: false,
-        class: "border-border text-fg hover:border-accent-hover focus-within:border-border-focus",
+        // hover:focus-within: is not redundant with focus-within: alone.
+        // Tailwind batches all hover: utilities into one @media(hover:hover)
+        // block emitted after plain pseudo-class rules like :focus-within,
+        // so with equal specificity (one class + one pseudo each), clicking
+        // into the field — simultaneously :hover AND :focus-within, which
+        // is every mouse click — let hover's later rule win, showing
+        // accent-hover instead of the spec's "Pressed & Focus" border
+        // (design-spec §5). The 3-part selector's higher specificity
+        // forces focus to win whenever both apply, regardless of
+        // stylesheet order.
+        class:
+          "border-border text-fg hover:border-accent-hover focus-within:border-border-focus hover:focus-within:border-border-focus",
       },
       { error: true, disabled: false, class: "border-border-error text-fg" },
       // Disabled wins over error — the spec has no combined disabled+error
@@ -116,6 +127,13 @@ export interface InputProps
   /** Shows an inline clear (×) button while focused with content — design-spec §5. */
   clearable?: boolean;
   /**
+   * Sets `data-testid` on the rendered `<input>`. A plain `data-testid`
+   * prop doesn't type-check through a custom component (only intrinsic
+   * elements get that leniency), so this is the typed escape hatch for
+   * test selectors.
+   */
+  dataTestId?: string;
+  /**
    * Applies to the visible field box (border/bg), not the outer
    * label+field+error wrapper and not the bare `<input>` — the closest
    * equivalent here to Button's single rendered element.
@@ -135,6 +153,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       suffix,
       error,
       clearable = false,
+      dataTestId,
       disabled,
       id,
       onFocus,
@@ -237,6 +256,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={setRefs}
             id={inputId}
             type={type}
+            data-testid={dataTestId}
             disabled={disabled}
             value={value}
             defaultValue={defaultValue}

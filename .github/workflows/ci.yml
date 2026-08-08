@@ -105,6 +105,13 @@ jobs:
           install: false
           component: true
           browser: chrome
+          # Headed, not headless. cypress-real-events dispatches hover via CDP,
+          # and headless Chrome on Linux does not apply :hover from those
+          # events — the Ghost/danger hover assertion reads a transparent
+          # background instead of the hover fill. Windows headless does apply
+          # it, which is why this only fails in CI. Cypress starts Xvfb itself
+          # when DISPLAY is unset, so no extra setup is needed here.
+          headed: true
 
       # Cypress writes a screenshot per failed test. Without this the job log
       # is the only evidence, and it isn't readable via the API without admin

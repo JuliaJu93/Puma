@@ -135,6 +135,20 @@
      text lighter than its (white) background needs. */
   --color-input-fg-disabled: var(--color-neutral-400);
 
+  /* Input's standalone Prefix/Suffix anatomy (design-spec §5) gives the
+     affix segment its own background — verified directly against the raw
+     Figma API response for nodes 11:10955/11:11534, both #fafafa. This was
+     missed in the original spec pass (the combined "Prefix & Suffix"
+     variant's equivalent frames have no fill at all — a real inconsistency
+     between the two Figma pages; the standalone pages are the more
+     deliberate of the two, since they also give the affix segment a
+     calculated inset corner radius, see --radius-control-inset below).
+     Same primitive as --color-surface-disabled (also #fafafa) but a
+     distinct role — a static segment background, not a disabled-state
+     surface — so it gets its own name, same reasoning as every other
+     same-hex/different-role pair in this file. */
+  --color-input-affix-bg: var(--color-neutral-100);
+
   /* Decision 3 (design-spec §7.1): Ghost/danger changes text color on
      Pressed (--color-danger-pressed) but not on Hover, while every other
      colored style (Outline, Link) tracks the full ramp at every state.

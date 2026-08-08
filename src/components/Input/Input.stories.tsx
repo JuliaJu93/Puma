@@ -22,27 +22,22 @@ const MailIcon = (
   </svg>
 );
 
-type Anatomy = "basic" | "startIcon" | "endIcon" | "prefixSuffix" | "number";
-
-interface InputPlaygroundProps
-  extends Omit<InputProps, "startIcon" | "endIcon" | "prefix" | "suffix" | "type" | "error"> {
-  /** Styling group */
-  anatomy: Anatomy;
+interface InputPlaygroundProps extends Omit<InputProps, "error" | "label" | "startIcon" | "endIcon"> {
   /** Validation group */
   showError: boolean;
   errorMessage: string;
+  /** Ungrouped */
+  leftIcon: boolean;
+  rightIcon: boolean;
 }
 
-function InputPlayground({ anatomy, showError, errorMessage, ...props }: InputPlaygroundProps) {
+function InputPlayground({ showError, errorMessage, leftIcon, rightIcon, ...props }: InputPlaygroundProps) {
   return (
     <Input
       {...props}
       error={showError ? errorMessage || true : false}
-      startIcon={anatomy === "startIcon" ? SearchIcon : undefined}
-      endIcon={anatomy === "endIcon" ? MailIcon : undefined}
-      prefix={anatomy === "prefixSuffix" ? "¥" : undefined}
-      suffix={anatomy === "prefixSuffix" ? "CNY" : undefined}
-      type={anatomy === "number" ? "number" : "text"}
+      startIcon={leftIcon ? SearchIcon : undefined}
+      endIcon={rightIcon ? MailIcon : undefined}
     />
   );
 }
@@ -51,21 +46,28 @@ const meta: Meta<typeof InputPlayground> = {
   title: "Input",
   component: InputPlayground,
   args: {
-    label: "Label",
+    // No `label` control — design-spec §5 / §7.5: Figma has no label on any
+    // Input variant, so the Playground doesn't offer one either. A fixed
+    // aria-label keeps the field accessible without implying a label exists
+    // in the design; it's hidden from the table below rather than exposed
+    // as a knob.
+    "aria-label": "Input",
     placeholder: "Placeholder",
     size: "md",
-    anatomy: "basic",
     clearable: true,
     disabled: false,
     showError: false,
     errorMessage: "This field is required",
+    type: "text",
+    autoComplete: "off",
+    dataTestId: "input-field",
+    leftIcon: false,
+    rightIcon: false,
   },
   argTypes: {
     // Content — what's inside the field, not how it looks
-    label: {
-      control: "text",
-      description: "Renders a real <label> wired to the field via a generated id",
-      table: { category: "Content" },
+    "aria-label": {
+      table: { disable: true },
     },
     placeholder: {
       control: "text",
@@ -78,12 +80,6 @@ const meta: Meta<typeof InputPlayground> = {
       options: ["sm", "md", "lg"],
       description: "Sets a predetermined size of the component",
       table: { category: "Styling", defaultValue: { summary: "md" } },
-    },
-    anatomy: {
-      control: "select",
-      options: ["basic", "startIcon", "endIcon", "prefixSuffix", "number"],
-      description: "Which composable slot is populated — design-spec §5's 7 anatomy variants collapse to one component plus slots",
-      table: { category: "Styling", defaultValue: { summary: "basic" } },
     },
     clearable: {
       control: "boolean",
@@ -105,6 +101,48 @@ const meta: Meta<typeof InputPlayground> = {
       control: "text",
       description: "Message rendered below the field when showError is on",
       table: { category: "Validation" },
+    },
+    // Properties — native <input> attributes
+    type: {
+      control: "select",
+      options: ["text", "number", "email", "tel"],
+      description: "Native input type",
+      table: { category: "Properties", defaultValue: { summary: "text" } },
+    },
+    minLength: {
+      control: "number",
+      description: "Native minlength attribute",
+      table: { category: "Properties" },
+    },
+    maxLength: {
+      control: "number",
+      description: "Native maxlength attribute",
+      table: { category: "Properties" },
+    },
+    // Ungrouped
+    autoComplete: {
+      control: "text",
+      description: "Native autocomplete attribute",
+    },
+    dataTestId: {
+      control: "text",
+      description: "Sets data-testid on the rendered <input>, for test selectors",
+    },
+    prefix: {
+      control: "text",
+      description: "Static text before the value, e.g. a currency symbol",
+    },
+    suffix: {
+      control: "text",
+      description: "Static text after the value, e.g. a unit",
+    },
+    leftIcon: {
+      control: "boolean",
+      description: "Shows a leading icon in the field — design-spec §5 \"Left icon\" anatomy",
+    },
+    rightIcon: {
+      control: "boolean",
+      description: "Shows a trailing icon in the field — design-spec §5 \"Right icon\" anatomy",
     },
   },
 };
