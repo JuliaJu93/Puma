@@ -204,13 +204,12 @@ function InputVariations() {
       </table>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <span style={{ fontSize: 12, fontWeight: 600 }}>Anatomy (Medium)</span>
         <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 320 }}>
           <Input label="Left icon" startIcon={SearchIcon} placeholder="Search" />
           <Input label="Right icon" endIcon={MailIcon} placeholder="you@example.com" />
           <Input label="Prefix & suffix" prefix="¥" suffix="CNY" defaultValue="100" />
-          <Input label="Number stepper" type="number" defaultValue={1} />
-          <Input label="Clearable (focus the field to see the × button)" clearable defaultValue="Clear me" />
+          <Input label="Input number" type="number" defaultValue={1} />
+          <Input label="Clearable" clearable defaultValue="Clear me" />
         </div>
       </div>
     </div>

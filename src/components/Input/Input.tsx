@@ -27,13 +27,18 @@ const inputWrapperVariants = cva(
   // outline the whole field (icons/prefix included), not just the input.
   // Explicit transition properties, not the transition-colors utility — see
   // Button.tsx for the outline-color/Chromium transition bug this avoids.
-  "inline-flex w-full items-center gap-3 rounded-control border bg-surface outline-none transition-[color,background-color,border-color] duration-150 has-[input:focus-visible]:[outline:var(--focus-ring-width)_solid_var(--focus-ring-color)] has-[input:focus-visible]:outline-offset-[var(--focus-ring-offset)]",
+  // No padding or gap here — Prefix/Suffix (design-spec §5) need to sit
+  // flush against this border with their own background reaching full
+  // height, so padding/gap live on the inner "core" row instead (see
+  // CORE_SIZE_CLASS below). Without an affix, core is this wrapper's only
+  // child, so visually nothing changes from before.
+  "inline-flex w-full items-center rounded-control border bg-surface outline-none transition-[color,background-color,border-color] duration-150 has-[input:focus-visible]:[outline:var(--focus-ring-width)_solid_var(--focus-ring-color)] has-[input:focus-visible]:outline-offset-[var(--focus-ring-offset)]",
   {
     variants: {
       size: {
-        sm: "h-control-sm px-2 py-control-py-sm text-control-sm",
-        md: "h-control-md px-3 py-control-py-md text-control-md",
-        lg: "h-control-lg px-3 py-2 text-control-lg",
+        sm: "h-control-sm text-control-sm",
+        md: "h-control-md text-control-md",
+        lg: "h-control-lg text-control-lg",
       },
       error: { true: "", false: "" },
       disabled: { true: "", false: "" },
@@ -72,13 +77,59 @@ const inputWrapperVariants = cva(
 
 export type InputSize = NonNullable<VariantProps<typeof inputWrapperVariants>["size"]>;
 
-// Fixed 18x18 at every size — design-spec §5 samples the icon at Large only
-// ("Left icon | ... 18×18 ...") with no Medium/Small value recorded. Unlike
-// Button's icon ramp (§4, re-verified across all three sizes), there's
-// nothing here to scale, so this stays constant rather than inventing a
-// ramp. Reuses Button's --spacing-icon-lg token since it's the same
-// verified 18px value.
-const ICON_CLASS = "inline-flex shrink-0 size-icon-lg text-fg-muted [&>svg]:size-full";
+// Scales with Size (18/16/14) — verified against the raw Figma nodes for
+// Left icon at all three sizes, the same ramp as Button's (design-spec §4),
+// correcting an earlier pass here that only sampled Large and assumed it
+// stayed fixed. Reuses Button's own size-icon-lg/md/sm classes since it's
+// the identical ramp, not a coincidence worth a second token set.
+const ICON_CLASS = "inline-flex shrink-0 text-fg-muted [&>svg]:size-full";
+const ICON_SIZE_CLASS: Record<InputSize, string> = {
+  sm: "size-icon-sm",
+  md: "size-icon-md",
+  lg: "size-icon-lg",
+};
+
+// The clear (×) button's icon is its own, smaller ramp — 16/14/12, one step
+// below ICON_SIZE_CLASS at every size — verified against the raw Figma
+// nodes for the reused "Error" icon instance (11:8007/11:8011/11:8015).
+const CLEAR_ICON_SIZE_CLASS: Record<InputSize, string> = {
+  sm: "size-clear-icon-sm",
+  md: "size-clear-icon-md",
+  lg: "size-clear-icon-lg",
+};
+
+// Padding/gap moved off the wrapper (see inputWrapperVariants above) onto
+// this inner row, which holds everything except Prefix/Suffix: icons, the
+// <input> itself, the clear button, and the number stepper. gap is the
+// internal spacing between those children (icon↔text, text↔clear) —
+// verified as its own 8/8/4 ramp against the raw Figma nodes, distinct from
+// the 12/12/8 outer padding ramp (both real, independently sampled values,
+// not derived from one another).
+const CORE_SIZE_CLASS: Record<InputSize, string> = {
+  sm: "gap-1 px-2 py-control-py-sm",
+  md: "gap-2 px-3 py-control-py-md",
+  lg: "gap-2 px-3 py-2",
+};
+
+// Horizontal-only — the affix segment has no vertical padding of its own
+// (its background stretches to the wrapper's full height via self-stretch
+// instead). Reuses the same horizontal scale as CORE_SIZE_CLASS rather than
+// the slightly asymmetric 11px/12px Figma samples (§5, standalone Prefix/
+// Suffix nodes) — those differ from the field's own padding by exactly the
+// 1px border inset, the same reasoning as --radius-control-inset, but
+// that's a sub-pixel nicety not worth a second padding scale for.
+const AFFIX_SIZE_CLASS: Record<InputSize, string> = {
+  sm: "px-2",
+  md: "px-3",
+  lg: "px-3",
+};
+
+// design-spec §5 (standalone Prefix/Suffix, verified against raw Figma
+// nodes 11:10955/11:11534 — see --color-input-affix-bg in index.css).
+// self-stretch makes the background reach the wrapper's full height
+// (matching the existing number-stepper column's use of the same trick)
+// regardless of the wrapper's own items-center.
+const AFFIX_CLASS = "flex shrink-0 items-center self-stretch bg-input-affix-bg text-fg-muted";
 
 /**
  * `.stepUp()`/`.stepDown()` and the clear button both mutate `input.value`
@@ -173,6 +224,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     const generatedId = useId();
     const inputId = id ?? generatedId;
     const errorMessageId = `${inputId}-error`;
+    const clearMaskId = `${inputId}-clear-mask`;
 
     const [isFocused, setIsFocused] = useState(false);
     // Only tracks the uncontrolled case. When `value` is provided, "has
@@ -245,77 +297,108 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
         <div
           className={cn(inputWrapperVariants({ size, error: hasError, disabled: Boolean(disabled) }), className)}
         >
-          {prefix && <span className="shrink-0 text-fg-muted">{prefix}</span>}
-          {startIcon && (
-            <span className={ICON_CLASS} aria-hidden="true">
-              {startIcon}
+          {prefix && (
+            <span className={cn(AFFIX_CLASS, AFFIX_SIZE_CLASS[size ?? "md"], "rounded-l-[var(--radius-control-inset)]")}>
+              {prefix}
             </span>
           )}
-          <input
-            {...props}
-            ref={setRefs}
-            id={inputId}
-            type={type}
-            data-testid={dataTestId}
-            disabled={disabled}
-            value={value}
-            defaultValue={defaultValue}
-            aria-invalid={hasError || undefined}
-            aria-describedby={describedBy}
-            aria-label={ariaLabel}
-            aria-labelledby={ariaLabelledBy}
-            onFocus={(event) => {
-              setIsFocused(true);
-              onFocus?.(event);
-            }}
-            onBlur={(event) => {
-              setIsFocused(false);
-              onBlur?.(event);
-            }}
-            onChange={(event) => {
-              setUncontrolledHasValue(event.target.value.length > 0);
-              onChange?.(event);
-            }}
-            className={cn(
-              "w-full min-w-0 border-0 bg-transparent p-0 text-inherit outline-none placeholder:text-fg-subtle",
-              "[-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
-              disabled && "placeholder:text-input-fg-disabled",
+          <div className={cn("flex min-w-0 flex-1 items-center", CORE_SIZE_CLASS[size ?? "md"])}>
+            {startIcon && (
+              <span className={cn(ICON_CLASS, ICON_SIZE_CLASS[size ?? "md"])} aria-hidden="true">
+                {startIcon}
+              </span>
             )}
-          />
-          {showClear && (
-            <button
-              type="button"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={handleClear}
-              aria-label={label ? `Clear ${label}` : "Clear input"}
-              className="shrink-0 text-fg-subtle outline-none transition-colors hover:text-fg-muted active:text-fg"
-            >
-              <svg viewBox="0 0 16 16" width="14" height="14" fill="none" aria-hidden="true">
-                <path d="M4 4L12 12M12 4L4 12" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-              </svg>
-            </button>
-          )}
-          {isNumber && !disabled && (
-            // Native spinners are hidden above; design-spec §5 anatomy calls
-            // for a custom stepper column instead. Not in the tab order —
-            // the native input's own ArrowUp/ArrowDown already provide full
-            // keyboard access, so these are mouse-only shortcuts, the same
-            // relationship a native OS spinner has to typing digits directly.
-            <div className="flex shrink-0 flex-col justify-center gap-0.5 self-stretch text-fg-muted">
-              <button type="button" tabIndex={-1} aria-hidden="true" onClick={() => handleStep(1)} className="hover:text-fg">
-                <ChevronIcon direction="up" />
+            <input
+              {...props}
+              ref={setRefs}
+              id={inputId}
+              type={type}
+              data-testid={dataTestId}
+              disabled={disabled}
+              value={value}
+              defaultValue={defaultValue}
+              aria-invalid={hasError || undefined}
+              aria-describedby={describedBy}
+              aria-label={ariaLabel}
+              aria-labelledby={ariaLabelledBy}
+              onFocus={(event) => {
+                setIsFocused(true);
+                onFocus?.(event);
+              }}
+              onBlur={(event) => {
+                setIsFocused(false);
+                onBlur?.(event);
+              }}
+              onChange={(event) => {
+                setUncontrolledHasValue(event.target.value.length > 0);
+                onChange?.(event);
+              }}
+              className={cn(
+                "w-full min-w-0 border-0 bg-transparent p-0 text-inherit outline-none placeholder:text-fg-subtle",
+                "[-moz-appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none",
+                disabled && "placeholder:text-input-fg-disabled",
+              )}
+            />
+            {showClear && (
+              <button
+                type="button"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={handleClear}
+                aria-label={label ? `Clear ${label}` : "Clear input"}
+                className="shrink-0 text-fg-subtle outline-none transition-colors hover:text-fg-muted active:text-fg"
+              >
+                {/* design-spec §5: Figma's icon is an instance of a shared
+                    "Error" icon component (Theme=Fill) reused as the clear
+                    glyph — a single-fill "Subtract" vector, i.e. a solid
+                    filled circle with the × cut out of it, not a bare
+                    stroked ×. A <mask> reproduces that as a true hole
+                    rather than painting over it, so it stays correct
+                    regardless of what's behind it. */}
+                <svg
+                  viewBox="0 0 16 16"
+                  className={CLEAR_ICON_SIZE_CLASS[size ?? "md"]}
+                  aria-hidden="true"
+                >
+                  <mask id={clearMaskId}>
+                    <rect width="16" height="16" fill="white" />
+                    <path
+                      d="M5.5 5.5L10.5 10.5M10.5 5.5L5.5 10.5"
+                      stroke="black"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                    />
+                  </mask>
+                  <circle cx="8" cy="8" r="7.33" fill="currentColor" mask={`url(#${clearMaskId})`} />
+                </svg>
               </button>
-              <button type="button" tabIndex={-1} aria-hidden="true" onClick={() => handleStep(-1)} className="hover:text-fg">
-                <ChevronIcon direction="down" />
-              </button>
-            </div>
-          )}
-          {endIcon && (
-            <span className={ICON_CLASS} aria-hidden="true">
-              {endIcon}
+            )}
+            {isNumber && !disabled && (
+              // Native spinners are hidden above; design-spec §5 anatomy
+              // calls for a custom stepper column instead. Not in the tab
+              // order — the native input's own ArrowUp/ArrowDown already
+              // provide full keyboard access, so these are mouse-only
+              // shortcuts, the same relationship a native OS spinner has to
+              // typing digits directly.
+              <div className="flex shrink-0 flex-col justify-center gap-0.5 self-stretch text-fg-muted">
+                <button type="button" tabIndex={-1} aria-hidden="true" onClick={() => handleStep(1)} className="hover:text-fg">
+                  <ChevronIcon direction="up" />
+                </button>
+                <button type="button" tabIndex={-1} aria-hidden="true" onClick={() => handleStep(-1)} className="hover:text-fg">
+                  <ChevronIcon direction="down" />
+                </button>
+              </div>
+            )}
+            {endIcon && (
+              <span className={cn(ICON_CLASS, ICON_SIZE_CLASS[size ?? "md"])} aria-hidden="true">
+                {endIcon}
+              </span>
+            )}
+          </div>
+          {suffix && (
+            <span className={cn(AFFIX_CLASS, AFFIX_SIZE_CLASS[size ?? "md"], "rounded-r-[var(--radius-control-inset)]")}>
+              {suffix}
             </span>
           )}
-          {suffix && <span className="shrink-0 text-fg-muted">{suffix}</span>}
         </div>
         {errorMessage && (
           // design-spec §5: the error message is always 14px/22

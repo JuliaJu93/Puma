@@ -207,6 +207,16 @@
   --radius-control: 4px; /* Button, Input, Dialog modal — every style/size */
   --radius-pill: 100px; /* IconButton — literal spec value, not Tailwind's rounded-full */
 
+  /* Input's Prefix/Suffix affix segment (design-spec §5, verified against
+     the raw Figma nodes — see --color-input-affix-bg above) sits flush
+     against the field's own 1px inside-aligned border, so its outer corner
+     needs the control radius reduced by that border width to nest without
+     a visible seam (verified: Figma samples this itself as exactly 3px =
+     4px - 1px, not an independently chosen value). Derived via calc()
+     rather than hardcoding 3px so it stays correct if either input ever
+     changes. */
+  --radius-control-inset: calc(var(--radius-control) - var(--border-width-default));
+
   /* Border width — design-spec §3. Note: this equals Tailwind's own default
      `border` utility (1px), so no component code needs this token directly;
      it's kept for traceability/audit since the brief lists it explicitly. */
@@ -249,10 +259,25 @@
      Size (18/16/14), verified across styles/intents; not a fixed value, and
      not covered by the original Left Icon=False sampling pass. Under
      --spacing-* for the same reason as the control heights above: it's what
-     makes the size-icon-lg/md/sm utilities exist. */
+     makes the size-icon-lg/md/sm utilities exist.
+
+     Also reused directly by Input's startIcon/endIcon (design-spec §5) —
+     verified against the raw Figma nodes for Left icon at all three sizes
+     (18/16/14, e.g. 11:8543/11:8539/11:8547), the exact same ramp as
+     Button's, correcting an earlier pass that only sampled Large and
+     assumed it stayed fixed. */
   --spacing-icon-lg: 18px;
   --spacing-icon-md: 16px;
   --spacing-icon-sm: 14px;
+
+  /* Input's clear (×) button icon — design-spec §5, verified against the
+     raw Figma nodes for the "Error" icon instance reused as the clear
+     glyph (11:8007/11:8011/11:8015). One size step below the field's own
+     icon ramp at every size (16/14/12 vs. 18/16/14) — a real, independently
+     sampled ramp, not derived from the other one. */
+  --spacing-clear-icon-lg: 16px;
+  --spacing-clear-icon-md: 14px;
+  --spacing-clear-icon-sm: 12px;
 
   /* Button min-width — design-spec §4 "Min-width and Link's box" correction.
      Primary/Outline/Ghost only — Link has no padding/fixed-height/min-width

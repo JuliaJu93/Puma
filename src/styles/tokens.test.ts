@@ -92,6 +92,7 @@ describe("semantic tokens resolve to the expected primitive value", () => {
     "color-danger-disabled-fg": "#f49898",
     "color-border-divider": "#eeeeee",
     "color-warning": "#ffad0d",
+    "color-input-affix-bg": "#fafafa",
   };
 
   it.each(Object.entries(semantics))("--%s resolves to %s", (name, expected) => {
@@ -115,6 +116,7 @@ describe("non-color tokens match design-spec.md §2 / §3", () => {
     "text-title--line-height": "1.625rem",
     "radius-control": "4px",
     "radius-pill": "100px",
+    "radius-control-inset": "calc(var(--radius-control) - var(--border-width-default))",
     "border-width-default": "1px",
     "spacing-control-lg": "40px",
     "spacing-control-md": "36px",
@@ -127,6 +129,9 @@ describe("non-color tokens match design-spec.md §2 / §3", () => {
     "spacing-icon-lg": "18px",
     "spacing-icon-md": "16px",
     "spacing-icon-sm": "14px",
+    "spacing-clear-icon-lg": "16px",
+    "spacing-clear-icon-md": "14px",
+    "spacing-clear-icon-sm": "12px",
     "spacing-button-lg": "106px",
     "spacing-button-md": "98px",
     "spacing-button-sm": "62px",
