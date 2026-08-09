@@ -1,5 +1,11 @@
 # @kashlewa.ju93/faster-ui
 
+## 1.0.1
+
+### Patch Changes
+
+- [`fb3d91a`](https://github.com/JuliaJu93/Puma/commit/fb3d91a6474c192fd7d01eec27b8fdac570045a9) Thanks [@JuliaJu93](https://github.com/JuliaJu93)! - fixed label for input
+
 ## 1.0.0
 
 ### Major Changes
