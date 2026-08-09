@@ -64,10 +64,10 @@ const meta: Meta<typeof InputPlayground> = {
   component: InputPlayground,
   args: {
     label: "Label",
-    // hideLabel defaults on: design-spec §5 / §7.5 — Figma has no visible
-    // label on any Input variant, so the Playground matches that by
-    // default. `label` is still required (it's the field's real accessible
-    // name either way) — toggle hideLabel off to see it rendered.
+    // Matches Input's own default (design-spec §5 / §7.5 — Figma has no
+    // visible label on any variant). `label` is still required (it's the
+    // field's real accessible name either way) — toggle hideLabel off to
+    // see it rendered.
     hideLabel: true,
     placeholder: "Placeholder",
     size: "md",
@@ -236,12 +236,15 @@ function InputVariations() {
       </table>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        {/* hideLabel={false}: the label here doubles as this catalog's own
+            caption for each row (Input itself hides it by default, since
+            Figma has no visible-label anatomy — see design-spec §5/§7.5). */}
         <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 320 }}>
-          <Input label="Left icon" startIcon={SearchIcon} placeholder="Search" />
-          <Input label="Right icon" endIcon={MailIcon} placeholder="you@example.com" />
-          <Input label="Prefix & suffix" prefix="¥" suffix="CNY" defaultValue="100" />
-          <Input label="Input number" type="number" defaultValue={1} />
-          <Input label="Clearable" clearable defaultValue="Clear me" />
+          <Input label="Left icon" startIcon={SearchIcon} placeholder="Search" hideLabel={false} />
+          <Input label="Right icon" endIcon={MailIcon} placeholder="you@example.com" hideLabel={false} />
+          <Input label="Prefix & suffix" prefix="¥" suffix="CNY" defaultValue="100" hideLabel={false} />
+          <Input label="Input number" type="number" defaultValue={1} hideLabel={false} />
+          <Input label="Clearable" clearable defaultValue="Clear me" hideLabel={false} />
         </div>
       </div>
     </div>

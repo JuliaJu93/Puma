@@ -188,11 +188,16 @@ export interface InputProps
    * name than `aria-label` (click-to-focus, rich content, better AT
    * support), and a required prop catches a missing name at compile time
    * instead of a console warning someone has to notice. Figma's own Input
-   * has no label anatomy at all, so this is net-new either way — pass
-   * `hideLabel` for the cases where a visible one genuinely isn't wanted.
+   * has no label anatomy at all, so it's visually hidden by default (see
+   * `hideLabel`) — pass `hideLabel={false}` for the cases that do want it visible.
    */
   label: string;
-  /** Visually hides the label (via `sr-only`) while keeping it in the DOM as the field's real accessible name — for compact/icon-only fields that don't want a visible label. */
+  /**
+   * Visually hides the label (via `sr-only`) while keeping it in the DOM as
+   * the field's real accessible name. Defaults to `true` — Figma's Input
+   * has no visible-label anatomy in any variant, so that's the look every
+   * consumer gets unless they opt out.
+   */
   hideLabel?: boolean;
   startIcon?: ReactNode;
   endIcon?: ReactNode;
@@ -225,7 +230,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       className,
       size,
       label,
-      hideLabel = false,
+      hideLabel = true,
       startIcon,
       endIcon,
       prefix,
