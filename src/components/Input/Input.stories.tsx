@@ -63,12 +63,10 @@ const meta: Meta<typeof InputPlayground> = {
   title: "Input",
   component: InputPlayground,
   args: {
+    // Always visually hidden (design-spec §5 / §7.5 — Figma has no visible
+    // label on any variant) — still required, since it's the field's real
+    // accessible name regardless.
     label: "Label",
-    // Matches Input's own default (design-spec §5 / §7.5 — Figma has no
-    // visible label on any variant). `label` is still required (it's the
-    // field's real accessible name either way) — toggle hideLabel off to
-    // see it rendered.
-    hideLabel: true,
     placeholder: "Placeholder",
     size: "md",
     clearable: true,
@@ -86,13 +84,8 @@ const meta: Meta<typeof InputPlayground> = {
     // Content — what's inside the field, not how it looks
     label: {
       control: "text",
-      description: "Renders a real <label> wired to the field via a generated id — required",
+      description: "The field's real accessible name (required) — rendered as a real <label>, always visually hidden since Figma has no visible-label anatomy",
       table: { category: "Content" },
-    },
-    hideLabel: {
-      control: "boolean",
-      description: "Visually hides the label (sr-only) while keeping it as the field's accessible name",
-      table: { category: "Content", defaultValue: { summary: "true" } },
     },
     placeholder: {
       control: "text",
@@ -216,7 +209,7 @@ function InputVariations() {
             <tr key={size}>
               <td style={headerCellStyle}>{size}</td>
               <td style={cellStyle}>
-                <Input size={size} placeholder="Placeholder" label={`${size} default`} hideLabel />
+                <Input size={size} placeholder="Placeholder" label={`${size} default`} />
               </td>
               <td style={cellStyle}>
                 <Input
@@ -224,11 +217,10 @@ function InputVariations() {
                   defaultValue="Invalid value"
                   error="This field is required"
                   label={`${size} error`}
-                  hideLabel
                 />
               </td>
               <td style={cellStyle}>
-                <Input size={size} defaultValue="Can't edit" disabled label={`${size} disabled`} hideLabel />
+                <Input size={size} defaultValue="Can't edit" disabled label={`${size} disabled`} />
               </td>
             </tr>
           ))}
@@ -236,15 +228,28 @@ function InputVariations() {
       </table>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        {/* hideLabel={false}: the label here doubles as this catalog's own
-            caption for each row (Input itself hides it by default, since
-            Figma has no visible-label anatomy — see design-spec §5/§7.5). */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 12, maxWidth: 320 }}>
-          <Input label="Left icon" startIcon={SearchIcon} placeholder="Search" hideLabel={false} />
-          <Input label="Right icon" endIcon={MailIcon} placeholder="you@example.com" hideLabel={false} />
-          <Input label="Prefix & suffix" prefix="¥" suffix="CNY" defaultValue="100" hideLabel={false} />
-          <Input label="Input number" type="number" defaultValue={1} hideLabel={false} />
-          <Input label="Clearable" clearable defaultValue="Clear me" hideLabel={false} />
+        {/* Input's own `label` is always sr-only (design-spec §5/§7.5 — no
+            visible-label anatomy exists in Figma), so this catalog needs its
+            own plain caption per row rather than relying on `label` to show. */}
+        <div style={{ display: "flex", flexDirection: "column", gap: 16, maxWidth: 320 }}>
+          {[
+            { caption: "Left icon", input: <Input label="Left icon" startIcon={SearchIcon} placeholder="Search" /> },
+            {
+              caption: "Right icon",
+              input: <Input label="Right icon" endIcon={MailIcon} placeholder="you@example.com" />,
+            },
+            {
+              caption: "Prefix & suffix",
+              input: <Input label="Prefix & suffix" prefix="¥" suffix="CNY" defaultValue="100" />,
+            },
+            { caption: "Input number", input: <Input label="Input number" type="number" defaultValue={1} /> },
+            { caption: "Clearable", input: <Input label="Clearable" clearable defaultValue="Clear me" /> },
+          ].map(({ caption, input }) => (
+            <div key={caption} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
+              <span style={{ fontSize: 12, fontWeight: 600 }}>{caption}</span>
+              {input}
+            </div>
+          ))}
         </div>
       </div>
     </div>

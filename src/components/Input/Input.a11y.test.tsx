@@ -21,7 +21,7 @@ const AXE_OPTIONS = {
 };
 
 describe("Input accessibility", () => {
-  it("with a label has no violations", async () => {
+  it("with a label has no violations — the label is always visually hidden (sr-only), never removed", async () => {
     const { container } = render(<Input label="Email" />);
     const results = await axe(container, AXE_OPTIONS);
     expect(results).toHaveNoViolations();
@@ -35,12 +35,6 @@ describe("Input accessibility", () => {
 
   it("disabled has no violations", async () => {
     const { container } = render(<Input label="Email" disabled />);
-    const results = await axe(container, AXE_OPTIONS);
-    expect(results).toHaveNoViolations();
-  });
-
-  it("with hideLabel has no violations — the label is visually hidden, not removed", async () => {
-    const { container } = render(<Input label="Search" hideLabel />);
     const results = await axe(container, AXE_OPTIONS);
     expect(results).toHaveNoViolations();
   });

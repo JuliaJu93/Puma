@@ -10,17 +10,10 @@ import { Input } from "./Input";
  * half (the field stays genuinely non-interactive).
  */
 describe("Input", () => {
-  it("label renders a real <label> correctly associated with the input", () => {
+  it("label renders a real <label>, correctly associated but always visually hidden", () => {
     render(<Input label="Email" />);
     expect(screen.getByLabelText("Email").tagName).toBe("INPUT");
-  });
-
-  it("hideLabel keeps the label as the accessible name but visually hides it", () => {
-    render(<Input label="Search" hideLabel />);
-    const input = screen.getByLabelText("Search");
-    const label = screen.getByText("Search");
-    expect(input.tagName).toBe("INPUT");
-    expect(label).toHaveClass("sr-only");
+    expect(screen.getByText("Email")).toHaveClass("sr-only");
   });
 
   describe("error", () => {

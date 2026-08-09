@@ -183,22 +183,15 @@ export interface InputProps
   /** Control height: 24 / 36 / 40px. Optional — defaults to `"md"`. */
   size?: InputSize;
   /**
-   * Renders a real `<label>` wired to the field via a generated id.
-   * Required — a real, always-present `<label>` is a stronger accessible
-   * name than `aria-label` (click-to-focus, rich content, better AT
-   * support), and a required prop catches a missing name at compile time
-   * instead of a console warning someone has to notice. Figma's own Input
-   * has no label anatomy at all, so it's visually hidden by default (see
-   * `hideLabel`) — pass `hideLabel={false}` for the cases that do want it visible.
+   * Renders a real `<label>` wired to the field via a generated id. Always
+   * visually hidden (`sr-only`) — Figma's Input has no visible-label
+   * anatomy in any variant, so there's no designed look for one to fall
+   * back to. Still required: a real, always-present `<label>` is a
+   * stronger accessible name than `aria-label` (click-to-focus, rich
+   * content, better AT support), and a required prop catches a missing
+   * name at compile time instead of a console warning someone has to notice.
    */
   label: string;
-  /**
-   * Visually hides the label (via `sr-only`) while keeping it in the DOM as
-   * the field's real accessible name. Defaults to `true` — Figma's Input
-   * has no visible-label anatomy in any variant, so that's the look every
-   * consumer gets unless they opt out.
-   */
-  hideLabel?: boolean;
   startIcon?: ReactNode;
   endIcon?: ReactNode;
   /** Static text before the value, e.g. a currency symbol — design-spec §5. */
@@ -230,7 +223,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       className,
       size,
       label,
-      hideLabel = true,
       startIcon,
       endIcon,
       prefix,
@@ -307,13 +299,11 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="flex flex-col items-start gap-input-stack-gap">
-        {/* Label typography/spacing is net-new (design-spec §5 / §7.5 — no
-            label exists in Figma). Reuses existing tokens only: sized down
-            from the field's own text so it reads as a label, not a second
-            copy of the value. Always a real <label> — hideLabel visually
-            hides it (sr-only) rather than not rendering it, so the field
-            keeps a proper accessible name either way. */}
-        <label htmlFor={inputId} className={hideLabel ? "sr-only" : "text-control-sm font-normal text-fg"}>
+        {/* design-spec §5 / §7.5: no label exists in any Figma variant, so
+            there's no designed visible treatment to fall back to — always
+            sr-only. Still a real <label for>, not aria-label, so it stays
+            the strongest accessible-name mechanism available (see InputProps). */}
+        <label htmlFor={inputId} className="sr-only">
           {label}
         </label>
         <div
