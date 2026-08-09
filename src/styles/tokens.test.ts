@@ -142,6 +142,12 @@ describe("non-color tokens match design-spec.md §2 / §3", () => {
     "spacing-dialog-lg": "900px",
     "spacing-dialog-md": "600px",
     "spacing-dialog-sm": "400px",
+    "spacing-dialog-padding": "24px",
+    "spacing-dialog-title-close-gap": "8px",
+    "spacing-dialog-header-gap": "16px",
+    "spacing-dialog-footer-gap": "8px",
+    "spacing-dialog-content-footer-gap": "32px",
+    "spacing-dialog-divided-footer-gap": "16px",
   };
 
   it.each(Object.entries(nonColorTokens))("--%s is %s", (name, expected) => {

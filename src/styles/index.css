@@ -1,3 +1,13 @@
+/* NOTE: this pulls in Tailwind's preflight (a global reset) along with theme
+   and utilities, and dist/faster.css ships to consumers — so importing this
+   stylesheet also restyles the host page's h1–h6, a, b/strong, lists and form
+   elements. That leak is a known trade-off, kept deliberately: the components
+   rely on preflight's `box-sizing: border-box`. Dropping it was tried and
+   measured — Dialog rendered 391px wide inside a 375px viewport, because
+   `max-width` began applying to the content box with `p-6` added on top.
+   Removing preflight safely requires scoping a box-sizing reset to our own
+   elements first (e.g. a data attribute on each component root); until then
+   the reset stays global. */
 @import "tailwindcss";
 
 /* Two-tier wiring check (Task 5): semantics are declared inside @theme as
@@ -316,6 +326,22 @@
   --spacing-dialog-lg: 900px;
   --spacing-dialog-md: 600px;
   --spacing-dialog-sm: 400px;
+
+  /* Dialog's own spacing — design-spec §3/§6, verified against the raw
+     Figma nodes (Modal padding/itemSpacing, Content itemSpacing, "title"
+     frame itemSpacing, Button Grid itemSpacing). Fixed px rather than
+     Tailwind's default padding/gap scale (calc(var(--spacing) times N),
+     rem-relative) — same reasoning as Input's spacing-input-gap and
+     spacing-input-stack-gap tokens above: Figma's own numbers are absolute
+     px, independent of root font-size, so the token should be too. Holds
+     at every size, not just Large — confirmed identical across the Large,
+     Medium, and Small "Basic" component samples. */
+  --spacing-dialog-padding: 24px; /* Modal padding, all sides */
+  --spacing-dialog-title-close-gap: 8px; /* Header: title text to close icon */
+  --spacing-dialog-header-gap: 16px; /* Header: title row to body (or to the divider line, With-divider — same value either way) */
+  --spacing-dialog-footer-gap: 8px; /* Footer: between the two buttons */
+  --spacing-dialog-content-footer-gap: 32px; /* Footer: gap above it, no divider */
+  --spacing-dialog-divided-footer-gap: 16px; /* Footer: gap above it, With-divider — the line itself already separates, so this is smaller than the 32px above */
 }
 
 /* ==========================================================================

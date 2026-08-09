@@ -56,7 +56,7 @@ export const DialogContent = forwardRef<HTMLDivElement, DialogContentProps>(
           // behaviour — granted exception (Step 4, Task 5): clamp to the
           // viewport with a 16px gutter on each side rather than inventing
           // per-breakpoint widths the spec doesn't have.
-          "fixed top-1/2 left-1/2 z-50 max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-control bg-surface p-6 shadow-dialog outline-none",
+          "fixed top-1/2 left-1/2 z-50 max-w-[calc(100vw-2rem)] -translate-x-1/2 -translate-y-1/2 rounded-control bg-surface p-dialog-padding shadow-dialog outline-none",
           DIALOG_WIDTH_CLASS[size],
           className,
         )}
@@ -80,13 +80,16 @@ export const DialogHeader = forwardRef<HTMLDivElement, DialogHeaderProps>(({ cla
         // Verified against the raw Figma nodes (Content frame itemSpacing):
         // 16px title-to-body gap, 8px title-to-close gap — both hold at
         // every size, not a judgment call.
-        "flex items-start justify-between gap-2 pb-4",
+        "flex items-start justify-between gap-dialog-title-close-gap pb-dialog-header-gap",
         // The With-divider variant's line spans the card's full width, not
         // just this padded content area (verified: the divider node's own
-        // width equals the Modal's, not Content's) — -mx-6/px-6 cancel and
-        // reapply Content's p-6 so the border sits flush with the card
-        // edge while the title/close stay inset the same as always.
-        divided && "-mx-6 border-b border-border-divider px-6",
+        // width equals the Modal's, not Content's) — -mx-[…]/px-dialog-padding
+        // cancel and reapply Content's own padding so the border sits flush
+        // with the card edge while the title/close stay inset the same as
+        // always. The negative margin uses the arbitrary-value form rather
+        // than a plain utility because Tailwind doesn't auto-generate a
+        // negative variant for a named (non-numeric) spacing key.
+        divided && "-mx-[var(--spacing-dialog-padding)] border-b border-border-divider px-dialog-padding",
         className,
       )}
       {...props}
@@ -137,13 +140,15 @@ export const DialogFooter = forwardRef<HTMLDivElement, DialogFooterProps>(({ cla
     <div
       ref={ref}
       className={cn(
-        "flex items-center justify-end gap-2",
+        "flex items-center justify-end gap-dialog-footer-gap",
         // 32px content-to-footer gap (design-spec §3) — but verified against
         // the raw Figma nodes, that's only true without a divider line; the
         // With-divider variant's own gap either side of its lines is 16px,
         // not 32 (the line itself already provides visual separation). Same
-        // -mx-6/px-6 full-bleed trick as DialogHeader for the line itself.
-        divided ? "-mx-6 border-t border-border-divider px-6 pt-4" : "pt-8",
+        // -mx-[…]/px-dialog-padding full-bleed trick as DialogHeader.
+        divided
+          ? "-mx-[var(--spacing-dialog-padding)] border-t border-border-divider px-dialog-padding pt-dialog-divided-footer-gap"
+          : "pt-dialog-content-footer-gap",
         className,
       )}
       {...props}
@@ -169,7 +174,7 @@ export const DialogClose = forwardRef<HTMLButtonElement, DialogCloseProps>(
         children
           ? className
           : cn(
-              "shrink-0 text-fg-muted outline-none transition-colors hover:text-fg focus-visible:[outline:var(--focus-ring-width)_solid_var(--focus-ring-color)] focus-visible:outline-offset-[var(--focus-ring-offset)]",
+              "shrink-0 cursor-pointer text-fg-muted outline-none transition-colors hover:text-fg focus-visible:[outline:var(--focus-ring-width)_solid_var(--focus-ring-color)] focus-visible:outline-offset-[var(--focus-ring-offset)]",
               className,
             )
       }

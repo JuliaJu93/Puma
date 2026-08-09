@@ -6,7 +6,7 @@ import {
   type ReactElement,
   type ReactNode,
 } from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { cn } from "../../utils/cn";
 
 /**
@@ -39,16 +39,16 @@ const buttonVariants = cva(
         outline: "border bg-surface font-normal",
         ghost: "border-0 bg-transparent font-normal",
         link: "border-0 bg-transparent font-normal",
-      },
+      } satisfies Record<ButtonVariant, string>,
       intent: {
         default: "",
         danger: "",
-      },
+      } satisfies Record<ButtonIntent, string>,
       size: {
         sm: "h-control-sm min-w-button-sm px-1 py-control-py-sm text-control-sm",
         md: "h-control-md min-w-button-md px-2 py-control-py-md text-control-md",
         lg: "h-control-lg min-w-button-lg px-2 py-2 text-control-lg",
-      },
+      } satisfies Record<ButtonSize, string>,
     },
     compoundVariants: [
       {
@@ -114,9 +114,20 @@ const buttonVariants = cva(
   },
 );
 
-export type ButtonVariant = NonNullable<VariantProps<typeof buttonVariants>["variant"]>;
-export type ButtonIntent = NonNullable<VariantProps<typeof buttonVariants>["intent"]>;
-export type ButtonSize = NonNullable<VariantProps<typeof buttonVariants>["size"]>;
+/**
+ * Written out by hand rather than derived from `VariantProps<typeof
+ * buttonVariants>` — see the note on `InputSize` in Input.tsx for the full
+ * reasoning. Short version: deriving them leaked
+ * `class-variance-authority/types` into the emitted `.d.ts`, which fails to
+ * resolve under `moduleResolution: "node"` and silently turns every variant
+ * prop into a *required* one for consumers.
+ *
+ * The `satisfies Record<…, string>` clauses on the cva config above fail the
+ * build if these unions and that config ever drift apart.
+ */
+export type ButtonVariant = "primary" | "outline" | "ghost" | "link";
+export type ButtonIntent = "default" | "danger";
+export type ButtonSize = "sm" | "md" | "lg";
 
 // design-spec §4 "Icon size" — 18/16/14px, scales with Size and is identical
 // across styles/intents. Forced via [&>svg]:size-full below rather than left
@@ -142,8 +153,13 @@ const ICON_ONLY_CLASS: Record<ButtonSize, string> = {
 };
 
 export interface ButtonProps
-  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color">,
-    VariantProps<typeof buttonVariants> {
+  extends Omit<ButtonHTMLAttributes<HTMLButtonElement>, "color"> {
+  /** Visual style. Optional — defaults to `"primary"`. */
+  variant?: ButtonVariant;
+  /** Colour intent. Optional — defaults to `"default"`. */
+  intent?: ButtonIntent;
+  /** Control height: 24 / 36 / 40px. Optional — defaults to `"md"`. */
+  size?: ButtonSize;
   /** Cosmetic only (color, choice of icon) — geometry is sized by Button per design-spec §4. */
   startIcon?: ReactNode;
   endIcon?: ReactNode;

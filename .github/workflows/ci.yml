@@ -187,6 +187,13 @@ jobs:
           publish: pnpm changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # changesets/action looks for an env var named exactly NPM_TOKEN to
+          # decide how to authenticate. With only NODE_AUTH_TOKEN set it reports
+          # "No NPM_TOKEN found" and falls back to OIDC trusted publishing —
+          # which npm rejects unless the package already exists and has a
+          # trusted publisher configured. Both are set here: NPM_TOKEN for the
+          # action's own logic, NODE_AUTH_TOKEN for the .npmrc setup-node wrote.
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
 

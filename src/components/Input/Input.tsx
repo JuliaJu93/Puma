@@ -9,7 +9,7 @@ import {
   type MutableRefObject,
   type ReactNode,
 } from "react";
-import { cva, type VariantProps } from "class-variance-authority";
+import { cva } from "class-variance-authority";
 import { cn } from "../../utils/cn";
 
 /**
@@ -39,7 +39,7 @@ const inputWrapperVariants = cva(
         sm: "h-control-sm text-control-sm",
         md: "h-control-md text-control-md",
         lg: "h-control-lg text-control-lg",
-      },
+      } satisfies Record<InputSize, string>,
       error: { true: "", false: "" },
       disabled: { true: "", false: "" },
     },
@@ -75,7 +75,22 @@ const inputWrapperVariants = cva(
   },
 );
 
-export type InputSize = NonNullable<VariantProps<typeof inputWrapperVariants>["size"]>;
+/**
+ * Written out by hand rather than derived from
+ * `VariantProps<typeof inputWrapperVariants>`.
+ *
+ * Deriving it put `class-variance-authority/types` into the emitted `.d.ts`.
+ * That subpath only resolves under `moduleResolution: "bundler"` / `"node16"`;
+ * under classic `"node"` the import failed, `VariantProps` collapsed to `any`,
+ * and `Pick<any, "size">` turned `size` into a **required** prop — consumers
+ * saw "Property 'size' is missing in type '{ label: string }'" with no hint
+ * that the real cause was an unresolvable third-party type.
+ *
+ * Keeping the public surface free of third-party types avoids that entirely.
+ * The `satisfies Record<InputSize, string>` on the cva `size` variants above
+ * fails the build if this union and the cva config ever drift apart.
+ */
+export type InputSize = "sm" | "md" | "lg";
 
 // Scales with Size (18/16/14) — verified against the raw Figma nodes for
 // Left icon at all three sizes, the same ramp as Button's (design-spec §4),
@@ -165,8 +180,9 @@ function ChevronIcon({ direction }: { direction: "up" | "down" }) {
 }
 
 export interface InputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix">,
-    Pick<VariantProps<typeof inputWrapperVariants>, "size"> {
+  extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix"> {
+  /** Control height: 24 / 36 / 40px. Optional — defaults to `"md"`. */
+  size?: InputSize;
   /** Renders a real `<label>` wired to the field via a generated id. */
   label?: string;
   startIcon?: ReactNode;
@@ -347,7 +363,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={handleClear}
                 aria-label={label ? `Clear ${label}` : "Clear input"}
-                className="shrink-0 text-fg-subtle outline-none transition-colors hover:text-fg-muted active:text-fg"
+                className="shrink-0 cursor-pointer text-fg-subtle outline-none transition-colors hover:text-fg-muted active:text-fg"
               >
                 {/* design-spec §5: Figma's icon is an instance of a shared
                     "Error" icon component (Theme=Fill) reused as the clear
@@ -382,10 +398,22 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               // shortcuts, the same relationship a native OS spinner has to
               // typing digits directly.
               <div className="flex shrink-0 flex-col justify-center gap-0.5 self-stretch text-fg-muted">
-                <button type="button" tabIndex={-1} aria-hidden="true" onClick={() => handleStep(1)} className="hover:text-fg">
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  onClick={() => handleStep(1)}
+                  className="cursor-pointer hover:text-fg"
+                >
                   <ChevronIcon direction="up" />
                 </button>
-                <button type="button" tabIndex={-1} aria-hidden="true" onClick={() => handleStep(-1)} className="hover:text-fg">
+                <button
+                  type="button"
+                  tabIndex={-1}
+                  aria-hidden="true"
+                  onClick={() => handleStep(-1)}
+                  className="cursor-pointer hover:text-fg"
+                >
                   <ChevronIcon direction="down" />
                 </button>
               </div>
