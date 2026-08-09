@@ -8,7 +8,7 @@ the API response, not estimated from a screenshot. Source JSON is cached in
 
 ## Method note — how frame mapping was actually resolved
 
-STEP-1-FIGMA.md expected the three CANVAS pages to break down into flat frames whose
+The initial plan expected the three CANVAS pages to break down into flat frames whose
 variant/state had to be inferred from PNGs, fill colors, and grid position, because Figma
 frame names are duplicated ("Button" appears 4 times, etc.).
 
@@ -397,7 +397,7 @@ inline clear (×) icon appears at the trailing edge (`state 2` in the Figma vari
 Applicable / Clear Hover / Clear Pressed). Icon tint `#cacaca` idle. This is a real,
 interactive sub-element of the Pressed & Focus state, not a separate top-level state.
 
-**No `read-only` state exists in this file.** STEP-1-FIGMA.md's guess included one; it isn't
+**No `read-only` state exists in this file.** The initial plan assumed one; it isn't
 there. Flagged in Open Questions rather than invented.
 
 **No label or helper text above the field exists in any captured variant** (outside the Error

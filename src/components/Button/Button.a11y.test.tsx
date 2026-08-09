@@ -9,12 +9,12 @@ import { Button, type ButtonIntent, type ButtonVariant } from "./Button";
  *
  * 1. docs/accessibility.md records that Primary/default and most Outline/
  *    Link/Ghost-danger text pairings genuinely fail WCAG AA — inherited
- *    unchanged from the Figma palette (STEP-3-TOKENS.md: values are
- *    recorded and traced, not adjusted to pass). That's a known,
- *    already-flagged limitation, not something a passing test should hide.
+ *    unchanged from the Figma palette, since values are recorded and
+ *    traced, not adjusted to pass. That's a known, already-flagged
+ *    limitation, not something a passing test should hide.
  * 2. Independently of (1), this project's Tailwind classes resolve through
  *    CSS custom properties (`var(--color-accent)` etc. — the two-tier
- *    token system PLAN.md describes), and jsdom's getComputedStyle does not
+ *    token system in src/styles/index.css), and jsdom's getComputedStyle does not
  *    resolve `var()` — verified directly: a `color: var(--x)` rule reads
  *    back as the literal string `"var(--x)"`, not a color axe can parse. So
  *    color-contrast cannot fire meaningfully in Jest regardless of (1); the

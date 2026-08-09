@@ -6,7 +6,7 @@ import { Button, type ButtonIntent, type ButtonSize, type ButtonVariant } from "
  * jsdom can't compute CSS (no Tailwind, no layout), so this file sticks to
  * what it can verify: rendering, ARIA, event handlers, and ref/className
  * plumbing. Computed colors, focus rings, and hover/active states live in
- * Button.cy.tsx instead — see STEP-5-TESTS.md's Jest/Cypress split.
+ * Button.cy.tsx instead.
  */
 describe("Button", () => {
   it("renders its children", () => {

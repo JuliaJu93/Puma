@@ -4,8 +4,8 @@ import { Input } from "./Input";
 /**
  * jsdom can't compute CSS, so this file sticks to rendering, ARIA wiring,
  * and event handlers. Computed colors/borders and the real :focus-visible
- * ring live in Input.cy.tsx instead — see STEP-5-TESTS.md's Jest/Cypress
- * split. "Disabled wins over error" is a border/background precedence, so
+ * ring live in Input.cy.tsx instead. "Disabled wins over error" is a
+ * border/background precedence, so
  * its visual half is verified there too; this file covers the behavioural
  * half (the field stays genuinely non-interactive).
  */

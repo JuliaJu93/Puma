@@ -15,7 +15,7 @@ Every component reads only from the **semantic** token layer (`--color-accent`,
 ## Install
 
 ```bash
-npm install @juliaju93/faster-ui
+npm install @kashlewa.ju93/faster-ui
 ```
 
 `react` and `react-dom` (18 or 19) are peer dependencies — installed already in any
@@ -24,8 +24,8 @@ React app, so nothing extra to add there.
 ## The two imports every consumer needs
 
 ```tsx
-import { Button } from "@juliaju93/faster-ui";
-import "@juliaju93/faster-ui/styles.css";
+import { Button } from "@kashlewa.ju93/faster-ui";
+import "@kashlewa.ju93/faster-ui/styles.css";
 ```
 
 The stylesheet import is easy to forget — without it every component still renders,
@@ -33,8 +33,8 @@ but with **no styling at all**: no colors, no spacing, no focus ring. It only ne
 to be imported once, anywhere in your app's entry point.
 
 ```tsx
-import { Button, Input, Dialog } from "@juliaju93/faster-ui";
-import "@juliaju93/faster-ui/styles.css";
+import { Button, Input, Dialog } from "@kashlewa.ju93/faster-ui";
+import "@kashlewa.ju93/faster-ui/styles.css";
 
 function Example() {
   return <Button variant="primary">Save changes</Button>;
@@ -45,9 +45,9 @@ function Example() {
 
 - **Foundations/Tokens** — the primitive and semantic color/spacing/type scale every
   component is built from.
-- **Components/Button**, **Components/Input**, **Components/Dialog** — each has a
-  `Playground` story with every prop exposed as a control, plus stories for every
-  variant, state, and layout.
+- **Button**, **Input**, **Dialog** — each has a `Playground` page with every prop
+  exposed as a control, plus a `Variations` story rendering every variant, state,
+  and size at once.
 
 ## Accessibility
 

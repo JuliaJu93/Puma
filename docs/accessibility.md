@@ -11,9 +11,9 @@ WCAG 2.1 AA thresholds used below:
   the interface, and a disabled control isn't actionable. Ratios for
   disabled pairs are listed below for completeness, not as failures.
 
-None of the values below were changed to pass — per `STEP-3-TOKENS.md`,
-design values are recorded and traced, not adjusted to fix contrast. Every
-hex here traces to `docs/design-spec.md` §1.
+None of the values below were changed to pass: design values are recorded
+and traced, never adjusted to fix contrast. Every hex here traces to
+`docs/design-spec.md` §1.
 
 ## Passing pairs
 
@@ -65,8 +65,8 @@ knowing before it comes up.
 and every Outline/Link/Primary text-on-brand pairing fail AA at their
 *active*, non-disabled state — including the most prominent one, the
 default Primary button. Fixing it would mean darkening the brand/danger
-"500" base colors, which is a design-value change outside this step's
-scope (`STEP-3-TOKENS.md`: don't invent or adjust spec values). Flagging it
+"500" base colors, which is a design-value change outside this library's
+scope — spec values are recorded, never invented or adjusted. Flagging it
 here is the deliverable; changing the ramp is a decision for whoever owns
 the Figma file.
 

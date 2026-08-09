@@ -5,7 +5,7 @@ import { Button } from "./Button";
  * no real layout. This file covers exactly what Jest can't: computed colors
  * against design-spec.md §4, real pseudo-class states, and real heights.
  * Behavioural/DOM assertions (onClick args, asChild, disabled wiring, aria)
- * live in Button.test.tsx instead — see STEP-5-TESTS.md's Jest/Cypress split.
+ * live in Button.test.tsx instead.
  *
  * `.realHover()` / `.realMouseDown()` / `.realClick()` come from
  * cypress-real-events: plain `cy.trigger("mouseover"/"mousedown")` dispatches

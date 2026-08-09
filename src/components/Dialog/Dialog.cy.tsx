@@ -5,7 +5,7 @@ import { Dialog } from "./Dialog";
  * jsdom (Jest) can't do focus trapping, scroll locking, or real keyboard
  * navigation — those need a real DOM and a real Radix mount. This file tests
  * Dialog's composition (that we wired Radix correctly), not Radix's own focus
- * trap implementation, per STEP-5-TESTS.md rule 2.
+ * trap implementation.
  */
 function BasicDialog() {
   return (
