@@ -8,21 +8,19 @@ import { Input } from "./Input";
  * Input focus border, placeholder text), and jsdom not resolving the
  * `var(--color-*)` chains this project's tokens compile to — so the rule
  * cannot fire meaningfully in Jest either way. Real computed-value contrast
- * coverage lives in Input.cy.tsx. What Jest *can* verify — and does below —
- * is the non-visual half: does the field have an accessible name at all.
+ * coverage lives in Input.cy.tsx.
+ *
+ * The "no accessible name" case that used to be tested here (mounting
+ * <Input /> with no label/aria-label/aria-labelledby and asserting an axe
+ * violation) no longer compiles at all now that `label` is a required prop
+ * — that's a stronger guarantee than a runtime axe check, so the test was
+ * removed rather than worked around with a type-cast.
  */
 const AXE_OPTIONS = {
   rules: { "color-contrast": { enabled: false } },
 };
 
 describe("Input accessibility", () => {
-  it("without label, aria-label, or aria-labelledby has a real accessible-name violation", async () => {
-    const { container } = render(<Input />);
-    const results = await axe(container, AXE_OPTIONS);
-    const nameViolation = results.violations.find((v) => v.id === "label");
-    expect(nameViolation).toBeDefined();
-  });
-
   it("with a label has no violations", async () => {
     const { container } = render(<Input label="Email" />);
     const results = await axe(container, AXE_OPTIONS);
@@ -37,6 +35,12 @@ describe("Input accessibility", () => {
 
   it("disabled has no violations", async () => {
     const { container } = render(<Input label="Email" disabled />);
+    const results = await axe(container, AXE_OPTIONS);
+    expect(results).toHaveNoViolations();
+  });
+
+  it("with hideLabel has no violations — the label is visually hidden, not removed", async () => {
+    const { container } = render(<Input label="Search" hideLabel />);
     const results = await axe(container, AXE_OPTIONS);
     expect(results).toHaveNoViolations();
   });

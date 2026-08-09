@@ -22,23 +22,40 @@ const MailIcon = (
   </svg>
 );
 
-interface InputPlaygroundProps extends Omit<InputProps, "error" | "label" | "startIcon" | "endIcon"> {
+interface InputPlaygroundProps extends Omit<InputProps, "error" | "startIcon" | "endIcon"> {
   /** Validation group */
   showError: boolean;
   errorMessage: string;
+  /** Accessibility group */
+  rtl: boolean;
   /** Ungrouped */
   leftIcon: boolean;
   rightIcon: boolean;
 }
 
-function InputPlayground({ showError, errorMessage, leftIcon, rightIcon, ...props }: InputPlaygroundProps) {
+// Arabic for "label" / "placeholder text" / "This field is required" —
+// swapped in under rtl so the check exercises real bidi text (mirrored
+// glyphs, connected script) rather than just flipping direction on the same
+// English words. Same idea as Button.stories.tsx's ARABIC_LABEL. Every
+// visible string in the field needs to swap under rtl, not just the label —
+// the error message and the clear button's aria-label (derived from label
+// below) are both rendered text a real RTL consumer would translate too.
+const ARABIC_LABEL = "التسمية";
+const ARABIC_PLACEHOLDER = "نص مؤقت";
+const ARABIC_ERROR_MESSAGE = "هذا الحقل مطلوب";
+
+function InputPlayground({ showError, errorMessage, rtl, leftIcon, rightIcon, label, placeholder, ...props }: InputPlaygroundProps) {
   return (
-    <Input
-      {...props}
-      error={showError ? errorMessage || true : false}
-      startIcon={leftIcon ? SearchIcon : undefined}
-      endIcon={rightIcon ? MailIcon : undefined}
-    />
+    <div dir={rtl ? "rtl" : "ltr"}>
+      <Input
+        {...props}
+        label={rtl ? ARABIC_LABEL : label}
+        placeholder={rtl ? ARABIC_PLACEHOLDER : placeholder}
+        error={showError ? (rtl ? ARABIC_ERROR_MESSAGE : errorMessage) || true : false}
+        startIcon={leftIcon ? SearchIcon : undefined}
+        endIcon={rightIcon ? MailIcon : undefined}
+      />
+    </div>
   );
 }
 
@@ -46,12 +63,12 @@ const meta: Meta<typeof InputPlayground> = {
   title: "Input",
   component: InputPlayground,
   args: {
-    // No `label` control — design-spec §5 / §7.5: Figma has no label on any
-    // Input variant, so the Playground doesn't offer one either. A fixed
-    // aria-label keeps the field accessible without implying a label exists
-    // in the design; it's hidden from the table below rather than exposed
-    // as a knob.
-    "aria-label": "Input",
+    label: "Label",
+    // hideLabel defaults on: design-spec §5 / §7.5 — Figma has no visible
+    // label on any Input variant, so the Playground matches that by
+    // default. `label` is still required (it's the field's real accessible
+    // name either way) — toggle hideLabel off to see it rendered.
+    hideLabel: true,
     placeholder: "Placeholder",
     size: "md",
     clearable: true,
@@ -63,11 +80,19 @@ const meta: Meta<typeof InputPlayground> = {
     dataTestId: "input-field",
     leftIcon: false,
     rightIcon: false,
+    rtl: false,
   },
   argTypes: {
     // Content — what's inside the field, not how it looks
-    "aria-label": {
-      table: { disable: true },
+    label: {
+      control: "text",
+      description: "Renders a real <label> wired to the field via a generated id — required",
+      table: { category: "Content" },
+    },
+    hideLabel: {
+      control: "boolean",
+      description: "Visually hides the label (sr-only) while keeping it as the field's accessible name",
+      table: { category: "Content", defaultValue: { summary: "true" } },
     },
     placeholder: {
       control: "text",
@@ -144,6 +169,12 @@ const meta: Meta<typeof InputPlayground> = {
       control: "boolean",
       description: "Shows a trailing icon in the field — design-spec §5 \"Right icon\" anatomy",
     },
+    // Accessibility
+    rtl: {
+      control: "boolean",
+      description: "Sets the field to display in RTL mode",
+      table: { category: "Accessibility", defaultValue: { summary: "false" } },
+    },
   },
 };
 
@@ -185,18 +216,19 @@ function InputVariations() {
             <tr key={size}>
               <td style={headerCellStyle}>{size}</td>
               <td style={cellStyle}>
-                <Input size={size} placeholder="Placeholder" aria-label={`${size} default`} />
+                <Input size={size} placeholder="Placeholder" label={`${size} default`} hideLabel />
               </td>
               <td style={cellStyle}>
                 <Input
                   size={size}
                   defaultValue="Invalid value"
                   error="This field is required"
-                  aria-label={`${size} error`}
+                  label={`${size} error`}
+                  hideLabel
                 />
               </td>
               <td style={cellStyle}>
-                <Input size={size} defaultValue="Can't edit" disabled aria-label={`${size} disabled`} />
+                <Input size={size} defaultValue="Can't edit" disabled label={`${size} disabled`} hideLabel />
               </td>
             </tr>
           ))}

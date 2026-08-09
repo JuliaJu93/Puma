@@ -25,18 +25,37 @@ interface DialogPlaygroundProps {
   size: DialogSize;
   variant: DialogVariant;
   divided: boolean;
+  /** Accessibility group */
+  rtl: boolean;
 }
 
-function DialogPlayground({ title, size, variant, divided }: DialogPlaygroundProps) {
+// Arabic strings — swapped in under rtl, same idea as Button.stories.tsx's
+// ARABIC_LABEL. Dialog.Content portals to document.body (see Dialog.tsx),
+// so a wrapping <div dir="rtl"> around the trigger wouldn't reach it
+// through the DOM tree — dir has to go directly on Dialog.Content itself,
+// which is just a plain HTML attribute Radix forwards regardless of where
+// the node is portaled. Every visible string inside the dialog needs to
+// swap under rtl, not just the title — the body copy and the footer
+// buttons' text are just as much rendered content a real RTL consumer
+// would translate.
+const ARABIC_TITLE = "حذف المشروع";
+const ARABIC_BODY = "لا يمكن التراجع عن هذا الإجراء. سيؤثر هذا بشكل دائم على بياناتك.";
+const ARABIC_SECTION = (n: number) => `القسم ${n}. مرر لقراءة بقية هذا المحتوى.`;
+const ARABIC_CANCEL = "إلغاء";
+const ARABIC_CONFIRM = "تأكيد";
+const ARABIC_DELETE = "حذف";
+const ARABIC_CLOSE = "إغلاق";
+
+function DialogPlayground({ title, size, variant, divided, rtl }: DialogPlaygroundProps) {
   return (
     <Dialog.Root>
       <Dialog.Trigger asChild>
         <Button>Open dialog</Button>
       </Dialog.Trigger>
-      <Dialog.Content size={size} divided={divided}>
+      <Dialog.Content size={size} divided={divided} dir={rtl ? "rtl" : "ltr"}>
         <Dialog.Header>
-          <Dialog.Title>{title}</Dialog.Title>
-          <Dialog.Close />
+          <Dialog.Title>{rtl ? ARABIC_TITLE : title}</Dialog.Title>
+          <Dialog.Close aria-label={rtl ? ARABIC_CLOSE : undefined} />
         </Dialog.Header>
         <Dialog.Body
           scrollable={variant === "scrollable"}
@@ -44,21 +63,21 @@ function DialogPlayground({ title, size, variant, divided }: DialogPlaygroundPro
         >
           {variant === "warning" && WarningIcon}
           {variant === "scrollable" ? (
-            Array.from({ length: 10 }, (_, i) => <p key={i}>Section {i + 1}. Scroll to read the rest of this content.</p>)
+            Array.from({ length: 10 }, (_, i) => <p key={i}>{rtl ? ARABIC_SECTION(i + 1) : `Section ${i + 1}. Scroll to read the rest of this content.`}</p>)
           ) : (
-            <span>This action cannot be undone. This will permanently affect your data.</span>
+            <span>{rtl ? ARABIC_BODY : "This action cannot be undone. This will permanently affect your data."}</span>
           )}
         </Dialog.Body>
         <Dialog.Footer>
           <Dialog.Close asChild>
-            <Button variant="ghost">Cancel</Button>
+            <Button variant="ghost">{rtl ? ARABIC_CANCEL : "Cancel"}</Button>
           </Dialog.Close>
           {variant === "warning" ? (
             <Button variant="outline" intent="danger">
-              Delete
+              {rtl ? ARABIC_DELETE : "Delete"}
             </Button>
           ) : (
-            <Button>Confirm</Button>
+            <Button>{rtl ? ARABIC_CONFIRM : "Confirm"}</Button>
           )}
         </Dialog.Footer>
       </Dialog.Content>
@@ -74,6 +93,7 @@ const meta: Meta<typeof DialogPlayground> = {
     size: "md",
     variant: "basic",
     divided: false,
+    rtl: false,
   },
   argTypes: {
     title: {
@@ -97,6 +117,12 @@ const meta: Meta<typeof DialogPlayground> = {
       control: "boolean",
       description: "Renders the \"with divider\" hairlines between header/body/footer",
       table: { category: "Styling", defaultValue: { summary: "false" } },
+    },
+    // Accessibility
+    rtl: {
+      control: "boolean",
+      description: "Sets the dialog to display in RTL mode",
+      table: { category: "Accessibility", defaultValue: { summary: "false" } },
     },
   },
 };

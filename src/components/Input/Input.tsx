@@ -1,7 +1,6 @@
 import {
   forwardRef,
   useCallback,
-  useEffect,
   useId,
   useRef,
   useState,
@@ -183,8 +182,18 @@ export interface InputProps
   extends Omit<InputHTMLAttributes<HTMLInputElement>, "size" | "prefix"> {
   /** Control height: 24 / 36 / 40px. Optional — defaults to `"md"`. */
   size?: InputSize;
-  /** Renders a real `<label>` wired to the field via a generated id. */
-  label?: string;
+  /**
+   * Renders a real `<label>` wired to the field via a generated id.
+   * Required — a real, always-present `<label>` is a stronger accessible
+   * name than `aria-label` (click-to-focus, rich content, better AT
+   * support), and a required prop catches a missing name at compile time
+   * instead of a console warning someone has to notice. Figma's own Input
+   * has no label anatomy at all, so this is net-new either way — pass
+   * `hideLabel` for the cases where a visible one genuinely isn't wanted.
+   */
+  label: string;
+  /** Visually hides the label (via `sr-only`) while keeping it in the DOM as the field's real accessible name — for compact/icon-only fields that don't want a visible label. */
+  hideLabel?: boolean;
   startIcon?: ReactNode;
   endIcon?: ReactNode;
   /** Static text before the value, e.g. a currency symbol — design-spec §5. */
@@ -216,6 +225,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
       className,
       size,
       label,
+      hideLabel = false,
       startIcon,
       endIcon,
       prefix,
@@ -253,17 +263,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
     // already available synchronously.
     const [uncontrolledHasValue, setUncontrolledHasValue] = useState(() => String(defaultValue ?? "").length > 0);
     const hasValue = value !== undefined ? String(value).length > 0 : uncontrolledHasValue;
-
-    useEffect(() => {
-      if (process.env.NODE_ENV !== "production" && !label && !ariaLabel && !ariaLabelledBy) {
-        console.error(
-          "Input: pass a `label`, `aria-label`, or `aria-labelledby` — a field with no accessible name is invisible to screen reader users.",
-        );
-      }
-      // Dev-only accessibility check, intentionally run once on mount rather
-      // than tracked every render.
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
 
     const setRefs = useCallback(
       (node: HTMLInputElement | null) => {
@@ -303,20 +302,23 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="flex flex-col items-start gap-input-stack-gap">
-        {label && (
-          // Label typography/spacing is net-new (design-spec §5 / §7.5 — no
-          // label exists in Figma). Reuses existing tokens only: sized down
-          // from the field's own text so it reads as a label, not a second
-          // copy of the value.
-          <label htmlFor={inputId} className="text-control-sm font-normal text-fg">
-            {label}
-          </label>
-        )}
+        {/* Label typography/spacing is net-new (design-spec §5 / §7.5 — no
+            label exists in Figma). Reuses existing tokens only: sized down
+            from the field's own text so it reads as a label, not a second
+            copy of the value. Always a real <label> — hideLabel visually
+            hides it (sr-only) rather than not rendering it, so the field
+            keeps a proper accessible name either way. */}
+        <label htmlFor={inputId} className={hideLabel ? "sr-only" : "text-control-sm font-normal text-fg"}>
+          {label}
+        </label>
         <div
           className={cn(inputWrapperVariants({ size, error: hasError, disabled: Boolean(disabled) }), className)}
         >
           {prefix && (
-            <span className={cn(AFFIX_CLASS, AFFIX_SIZE_CLASS[size ?? "md"], "rounded-l-[var(--radius-control-inset)]")}>
+            // rounded-s (logical "start"), not rounded-l — physical left
+            // doesn't flip under dir="rtl", and prefix needs to round
+            // whichever edge is actually outermost once the row mirrors.
+            <span className={cn(AFFIX_CLASS, AFFIX_SIZE_CLASS[size ?? "md"], "rounded-s-[var(--radius-control-inset)]")}>
               {prefix}
             </span>
           )}
@@ -362,7 +364,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
                 type="button"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={handleClear}
-                aria-label={label ? `Clear ${label}` : "Clear input"}
+                aria-label={`Clear ${label}`}
                 className="shrink-0 cursor-pointer text-fg-subtle outline-none transition-colors hover:text-fg-muted active:text-fg"
               >
                 {/* design-spec §5: Figma's icon is an instance of a shared
@@ -425,7 +427,8 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             )}
           </div>
           {suffix && (
-            <span className={cn(AFFIX_CLASS, AFFIX_SIZE_CLASS[size ?? "md"], "rounded-r-[var(--radius-control-inset)]")}>
+            // rounded-e (logical "end") — same reasoning as prefix's rounded-s above.
+            <span className={cn(AFFIX_CLASS, AFFIX_SIZE_CLASS[size ?? "md"], "rounded-e-[var(--radius-control-inset)]")}>
               {suffix}
             </span>
           )}

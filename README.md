@@ -2,10 +2,9 @@
 
 [![CI](https://github.com/JuliaJu93/Puma/actions/workflows/ci.yml/badge.svg)](https://github.com/JuliaJu93/Puma/actions/workflows/ci.yml)
 
-Button, Input, and Dialog components for PUMA's Faster design system.
+Button, Input, and Dialog components for Faster design system.
 
-Storybook: https://juliaju93.github.io/Puma/ (live once GitHub Pages is enabled — see
-[`plans/STEP-7-CI.md`](plans/STEP-7-CI.md)).
+Storybook: https://juliaju93.github.io/Puma/ 
 
 ## Requirements
 
@@ -47,28 +46,6 @@ The stylesheet import is required — components ship unstyled without it.
 
 React and ReactDOM are peer dependencies (`^18.2.0 || ^19.0.0`); this package never bundles its own
 copy.
-
-## Notes on the toolchain
-
-A few deviations from the original scaffold plan, driven by what the currently installed tool
-versions actually support:
-
-- **Vite is pinned to 7.x, not 8.x.** Vite 8 and TypeScript 7 were the `latest` dist-tags at
-  setup time, but the ESLint plugin ecosystem (`typescript-eslint`, `eslint-plugin-react`,
-  `eslint-plugin-jsx-a11y`) doesn't support ESLint 10 or TypeScript 7 yet, and Storybook 10
-  requires Node 20.19+ (the dev machine runs 20.18.3). Vite 7 + Storybook 9 + TypeScript 5.9 +
-  ESLint 9 is the newest combination where every tool in the chain is mutually compatible.
-- **`vite-plugin-dts`'s API changed under the hood** (now built on `unplugin-dts`): the
-  `rollupTypes` option was renamed `bundleTypes`. Not used here — declaration files are emitted
-  per-module rather than bundled into one file.
-- **`preserveModules` was considered and declined.** The plan flagged this as a tree-shaking-vs-
-  output-count tradeoff to confirm rather than guess. Decision: keep the single-bundle output —
-  simpler `dist/`, fewer files to publish and reason about. Revisit if bundle size becomes a real
-  concern once Button/Input/Dialog exist.
-- **`human-id` is pinned to `1.0.2` via a pnpm override.** `@changesets/cli` depends on
-  `human-id@^4.1.1`, which shipped as ESM-only and crashes every `changeset` CLI command
-  (`ERR_REQUIRE_ESM`) when required from the CLI's CJS code. `1.0.2` is the last release with the
-  same API and a CommonJS build. Upstream issue: changesets/changesets.
 
 ## Releasing
 

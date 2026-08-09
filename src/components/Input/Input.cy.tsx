@@ -12,7 +12,7 @@ describe("Input", () => {
 
   describe("mounting & rendering", () => {
     it("mounts and renders a real text input", () => {
-      cy.mount(<Input aria-label="Name" placeholder="Jane Doe" />);
+      cy.mount(<Input label="Name" placeholder="Jane Doe" />);
       cy.get("input").should("be.visible").and("have.attr", "placeholder", "Jane Doe");
     });
 
@@ -30,7 +30,7 @@ describe("Input", () => {
   describe("interactions", () => {
     it("fires onChange while typing", () => {
       const onChange = cy.stub().as("onChange");
-      cy.mount(<Input aria-label="Name" onChange={onChange} />);
+      cy.mount(<Input label="Name" onChange={onChange} />);
       cy.get("input").type("hi");
       cy.get("@onChange").should("have.callCount", 2);
       cy.get("input").should("have.value", "hi");
@@ -38,16 +38,16 @@ describe("Input", () => {
 
     it("clear button empties the field and fires onChange", () => {
       const onChange = cy.stub().as("onChange");
-      cy.mount(<Input aria-label="Name" clearable defaultValue="hello" onChange={onChange} />);
+      cy.mount(<Input label="Name" clearable defaultValue="hello" onChange={onChange} />);
       cy.get("input").realClick(); // focus, so the clear button becomes visible
-      cy.get("button[aria-label='Clear input']").should("be.visible").realClick();
+      cy.get("button[aria-label='Clear Name']").should("be.visible").realClick();
       cy.get("input").should("have.value", "");
       cy.get("@onChange").should("have.been.called");
     });
 
     it("number steppers increment/decrement and fire onChange", () => {
       const onChange = cy.stub().as("onChange");
-      cy.mount(<Input aria-label="Amount" type="number" defaultValue={1} onChange={onChange} />);
+      cy.mount(<Input label="Amount" type="number" defaultValue={1} onChange={onChange} />);
       cy.get("input").parent().find("button").first().realClick();
       cy.get("input").should("have.value", "2");
       cy.get("@onChange").should("have.been.called");
@@ -56,7 +56,7 @@ describe("Input", () => {
 
   describe("focus ring — has-[input:focus-visible] on the wrapper", () => {
     it("shows a ring around the wrapper on real keyboard focus", () => {
-      cy.mount(<Input aria-label="Name" />);
+      cy.mount(<Input label="Name" />);
       cy.realPress("Tab");
       // input -> core row (icons/input/clear/stepper) -> the actual bordered
       // field wrapper. Prefix/Suffix need their own background reaching the
@@ -76,7 +76,7 @@ describe("Input", () => {
       // visible :focus-visible ring regardless of input modality, since the
       // blinking caret alone isn't a reliable enough affordance. Not a
       // component bug, so asserted as the real, deliberate difference it is.
-      cy.mount(<Input aria-label="Name" />);
+      cy.mount(<Input label="Name" />);
       cy.get("input").realClick();
       cy.get("input").parent().parent().should("have.css", "outline-style", "solid");
     });
@@ -84,7 +84,7 @@ describe("Input", () => {
 
   describe("computed values vs design-spec.md §5", () => {
     it("default: white background, neutral border", () => {
-      cy.mount(<Input aria-label="Name" />);
+      cy.mount(<Input label="Name" />);
       cy.get("input")
         .parent()
         .parent()
@@ -93,7 +93,7 @@ describe("Input", () => {
     });
 
     it("error: danger border, text still readable", () => {
-      cy.mount(<Input aria-label="Name" error="Required" defaultValue="x" />);
+      cy.mount(<Input label="Name" error="Required" defaultValue="x" />);
       cy.get("input")
         .parent()
         .parent()
@@ -103,7 +103,7 @@ describe("Input", () => {
     });
 
     it("disabled: muted background, muted border, muted text — and wins over error", () => {
-      cy.mount(<Input aria-label="Name" error="Required" disabled defaultValue="x" />);
+      cy.mount(<Input label="Name" error="Required" disabled defaultValue="x" />);
       cy.get("input")
         .parent()
         .parent()
@@ -117,9 +117,9 @@ describe("Input", () => {
     it("sm is 24px, md is 36px, lg is 40px", () => {
       cy.mount(
         <div style={{ display: "flex", flexDirection: "column", gap: 8, width: 200 }}>
-          <Input aria-label="Small" size="sm" />
-          <Input aria-label="Medium" size="md" />
-          <Input aria-label="Large" size="lg" />
+          <Input label="Small" id="small" size="sm" />
+          <Input label="Medium" id="medium" size="md" />
+          <Input label="Large" id="large" size="lg" />
         </div>,
       );
       // .parent().parent(): the actual h-control-* wrapper, two levels up
@@ -127,9 +127,9 @@ describe("Input", () => {
       // just .parent() (the core row) happens to read the same height here
       // only because its padding + line-height are tuned to sum to it, not
       // because it's the element the height token is actually set on.
-      cy.get("input[aria-label=Small]").parent().parent().should("have.css", "height", "24px");
-      cy.get("input[aria-label=Medium]").parent().parent().should("have.css", "height", "36px");
-      cy.get("input[aria-label=Large]").parent().parent().should("have.css", "height", "40px");
+      cy.get("#small").parent().parent().should("have.css", "height", "24px");
+      cy.get("#medium").parent().parent().should("have.css", "height", "36px");
+      cy.get("#large").parent().parent().should("have.css", "height", "40px");
     });
   });
 });
