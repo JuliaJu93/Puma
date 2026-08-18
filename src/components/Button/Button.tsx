@@ -207,7 +207,6 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           <span className={iconClasses} aria-hidden="true">
             {endIcon}
           </span>
-          <span>dd</span>
         )}
       </button>
     );
