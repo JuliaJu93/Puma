@@ -1,6 +1,6 @@
 {
   "name": "@kashlewa.ju93/faster-ui",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Button, Input, and Dialog components for PUMA's Faster design system.",
   "type": "module",
   "license": "MIT",

@@ -1,5 +1,13 @@
 # @kashlewa.ju93/faster-ui
 
+## 1.0.2
+
+### Patch Changes
+
+- [`f897fa6`](https://github.com/JuliaJu93/Puma/commit/f897fa65f6c48cac74740b1872156eae6b13d2e3) Thanks [@JuliaJu93](https://github.com/JuliaJu93)! - f
+
+- [`a4bf3b0`](https://github.com/JuliaJu93/Puma/commit/a4bf3b097c0d73a5311331345df3c7d2b2199d6e) Thanks [@JuliaJu93](https://github.com/JuliaJu93)! - fixed btn
+
 ## 1.0.1
 
 ### Patch Changes
